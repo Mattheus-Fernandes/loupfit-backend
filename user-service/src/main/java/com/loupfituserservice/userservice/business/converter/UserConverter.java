@@ -6,6 +6,9 @@ import com.loupfituserservice.userservice.infrastructure.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserConverter {
@@ -28,6 +31,17 @@ public class UserConverter {
                 .username(user.getUsername())
                 .role(user.getRole())
                 .build();
+    }
+
+    public List<UserDTO> userDTOList(List<User> users) {
+
+        List<UserDTO> userDTOList = new ArrayList<UserDTO>();
+
+        for (User user: users) {
+            userDTOList.add(userDTO(user));
+        }
+
+        return userDTOList;
     }
 
 }
