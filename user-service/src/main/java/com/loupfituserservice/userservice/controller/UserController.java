@@ -13,10 +13,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -49,6 +48,17 @@ public class UserController {
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> findUser(@RequestParam(required = false) Long role) {
+
+        if (role == null) {
+            return ResponseEntity.ok(userService.filterAllUsers());
+
+        }
+
+        return ResponseEntity.ok(userService.filterByRole(role));
     }
 
 }

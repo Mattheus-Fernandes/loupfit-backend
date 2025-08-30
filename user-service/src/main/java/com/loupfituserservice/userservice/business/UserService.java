@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -30,15 +33,33 @@ public class UserService {
     }
 
     public void existUsername(String username) {
-       try {
-           boolean exist = userRepository.existsByUsername(username);
+        try {
+            boolean exist = userRepository.existsByUsername(username);
 
-           if (exist) {
-               throw new ConflictExcpetion("Usuário já cadastrado " + username);
-           }
-       } catch (ConflictExcpetion e ) {
-           throw new ConflictExcpetion(e.getMessage());
-       }
+            if (exist) {
+                throw new ConflictExcpetion("Usuário já cadastrado " + username);
+            }
+        } catch (ConflictExcpetion e) {
+            throw new ConflictExcpetion(e.getMessage());
+        }
+    }
+
+    public List<UserDTO> filterAllUsers() {
+        List<User> userList = userRepository.findAll();
+
+        return userConverter.userDTOList(userList);
+    }
+
+    public List<UserDTO> filterByRole(Long role) {
+        Long value = role == 1L ? 1L : 2L;
+        List<User> userList = userRepository.findByRole(value);
+
+        if (userList.isEmpty()) {
+            throw new ConflictExcpetion("Nenhum usuário encontrado");
+        }
+
+        return userConverter.userDTOList(userList);
+
     }
 
 }
