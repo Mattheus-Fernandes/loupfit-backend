@@ -61,4 +61,8 @@ public class UserController {
         return ResponseEntity.ok(userService.filterByRole(role));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.removeUser(id));
+    }
 }
