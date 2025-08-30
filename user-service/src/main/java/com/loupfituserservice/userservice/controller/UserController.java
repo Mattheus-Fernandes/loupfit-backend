@@ -3,6 +3,7 @@ package com.loupfituserservice.userservice.controller;
 import com.loupfituserservice.userservice.business.UserService;
 import com.loupfituserservice.userservice.business.dto.UserCreateDTO;
 import com.loupfituserservice.userservice.business.dto.UserDTO;
+import com.loupfituserservice.userservice.business.dto.UserEditDTO;
 import com.loupfituserservice.userservice.business.dto.UserLoginDTO;
 import com.loupfituserservice.userservice.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -64,5 +65,14 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.removeUser(id));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<UserDTO> updateUser(
+            @PathVariable Long id,
+            @RequestBody UserEditDTO userEditDTO
+    ) {
+
+        return ResponseEntity.ok(userService.editUser(id, userEditDTO));
     }
 }

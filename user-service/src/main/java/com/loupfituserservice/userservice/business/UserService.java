@@ -3,18 +3,15 @@ package com.loupfituserservice.userservice.business;
 import com.loupfituserservice.userservice.business.converter.UserConverter;
 import com.loupfituserservice.userservice.business.dto.UserCreateDTO;
 import com.loupfituserservice.userservice.business.dto.UserDTO;
-import com.loupfituserservice.userservice.business.dto.UserLoginDTO;
+import com.loupfituserservice.userservice.business.dto.UserEditDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.User;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfituserservice.userservice.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -90,6 +87,26 @@ public class UserService {
         userRepository.deleteById(id);
 
         return userConverter.userDTO(userDelete);
+    }
+
+    public UserDTO editUser(Long id, UserEditDTO userEditDTO) {
+
+        User user = userLogged();
+
+        if (!user.getRole().equals(1L)) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar usuário.");
+        }
+
+        userEditDTO.setPassword(userEditDTO.getPassword() != null ? passwordEncoder.encode(userEditDTO.getPassword()) : null);
+
+        User userEntity = userRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Usuário não encontrado")
+        );
+
+        User editUser = userConverter.userUpdate(userEditDTO, userEntity);
+
+        return userConverter.userDTO(userRepository.save(editUser));
+
     }
 
 }
