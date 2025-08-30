@@ -8,6 +8,9 @@ import com.loupfituserservice.userservice.infrastructure.entity.User;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfituserservice.userservice.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserConverter userConverter;
     private final PasswordEncoder passwordEncoder;
+
+    private User userLogged() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String user = authentication.getName();
+
+        return userRepository.findByUsername(user).orElseThrow(
+                () -> new ConflictExcpetion("Usuário logado não encontrado")
+        );
+    }
 
     public UserDTO addUser(UserCreateDTO userCreateDTO) {
         existUsername(userCreateDTO.getUsername());
@@ -60,6 +73,23 @@ public class UserService {
 
         return userConverter.userDTOList(userList);
 
+    }
+
+    public UserDTO removeUser(Long id) {
+
+        User user = userLogged();
+
+        if (!user.getRole().equals(1L)) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir usuário.");
+        }
+
+        User userDelete = userRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Usuário não encontrado")
+        );
+
+        userRepository.deleteById(id);
+
+        return userConverter.userDTO(userDelete);
     }
 
 }
