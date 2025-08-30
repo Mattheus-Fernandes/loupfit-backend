@@ -2,6 +2,7 @@ package com.loupfituserservice.userservice.business.converter;
 
 import com.loupfituserservice.userservice.business.dto.UserCreateDTO;
 import com.loupfituserservice.userservice.business.dto.UserDTO;
+import com.loupfituserservice.userservice.business.dto.UserEditDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,11 +38,22 @@ public class UserConverter {
 
         List<UserDTO> userDTOList = new ArrayList<UserDTO>();
 
-        for (User user: users) {
+        for (User user : users) {
             userDTOList.add(userDTO(user));
         }
 
         return userDTOList;
+    }
+
+    public User userUpdate(UserEditDTO userEditDTO, User user) {
+        return User.builder()
+                .id(user.getId())
+                .name(userEditDTO.getName() != null ? userEditDTO.getName() : user.getName())
+                .lastname(userEditDTO.getLastname() != null ? userEditDTO.getLastname() : user.getLastname())
+                .username(userEditDTO.getUsername() != null ? userEditDTO.getUsername() : user.getUsername())
+                .password(userEditDTO.getPassword() != null ? userEditDTO.getPassword() : user.getPassword())
+                .role(userEditDTO.getRole() != null ? userEditDTO.getRole() : user.getRole())
+                .build();
     }
 
 }
