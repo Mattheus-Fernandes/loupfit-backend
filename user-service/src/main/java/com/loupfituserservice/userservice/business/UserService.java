@@ -3,6 +3,7 @@ package com.loupfituserservice.userservice.business;
 import com.loupfituserservice.userservice.business.converter.UserConverter;
 import com.loupfituserservice.userservice.business.dto.UserCreateDTO;
 import com.loupfituserservice.userservice.business.dto.UserDTO;
+import com.loupfituserservice.userservice.business.dto.UserLoginDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.User;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfituserservice.userservice.infrastructure.repository.UserRepository;
