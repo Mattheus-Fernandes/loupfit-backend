@@ -69,4 +69,23 @@ public class AssetService {
         return assetConverter.assetDTOList(assetRepository.findByCreatedBy(username));
     }
 
+    public AssetDTO removeAsset(String token, String id) {
+
+        UserDTO userDTO = getCurrentUser(token);
+
+        if (userDTO.getRole() != 1) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir o equipamento.");
+        }
+
+        Asset assetDelete = assetRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Equipamento não encontrado")
+        );
+
+        assetRepository.delete(assetDelete);
+
+        return assetConverter.assetDTO(assetDelete);
+
+    }
+
+
 }

@@ -29,4 +29,9 @@ public class AssetController {
     public ResponseEntity<List<AssetDTO>> findAssetByUsername(@RequestParam String username) {
         return ResponseEntity.ok(assetService.assetAddedByCreatedBy(username));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<AssetDTO> deleteAsset(@RequestHeader("Authorization") String token, @PathVariable String id) {
+        return ResponseEntity.ok(assetService.removeAsset(token, id));
+    }
 }
