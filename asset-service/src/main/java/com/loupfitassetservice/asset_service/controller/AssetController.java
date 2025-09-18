@@ -34,4 +34,13 @@ public class AssetController {
     public ResponseEntity<AssetDTO> deleteAsset(@RequestHeader("Authorization") String token, @PathVariable String id) {
         return ResponseEntity.ok(assetService.removeAsset(token, id));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AssetDTO> updateAsset(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String id,
+            @RequestBody AssetDTO assetDTO
+    ) {
+        return  ResponseEntity.ok(assetService.editAsset(token, id, assetDTO));
+    }
 }

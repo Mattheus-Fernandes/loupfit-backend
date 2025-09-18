@@ -3,6 +3,7 @@ package com.loupfitassetservice.asset_service.business;
 import com.loupfitassetservice.asset_service.business.dto.AssetDTO;
 import com.loupfitassetservice.asset_service.business.dto.UserDTO;
 import com.loupfitassetservice.asset_service.business.mapper.AssetConverter;
+import com.loupfitassetservice.asset_service.business.mapper.AssetUpdateConverter;
 import com.loupfitassetservice.asset_service.infrastructure.client.UserClient;
 import com.loupfitassetservice.asset_service.infrastructure.entity.Asset;
 import com.loupfitassetservice.asset_service.infrastructure.exceptions.ConflictExcpetion;
@@ -21,6 +22,7 @@ public class AssetService {
     private final AssetRepository assetRepository;
     private final AssetConverter assetConverter;
     private final UserClient userClient;
+    private final AssetUpdateConverter assetUpdateConverter;
 
     private UserDTO getCurrentUser(String token) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -73,7 +75,7 @@ public class AssetService {
 
         UserDTO userDTO = getCurrentUser(token);
 
-        if (userDTO.getRole() != 1) {
+        if (!userDTO.getRole().equals(1)) {
             throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir o equipamento.");
         }
 
@@ -87,5 +89,23 @@ public class AssetService {
 
     }
 
+    public AssetDTO editAsset(String token, String id, AssetDTO assetDTO) {
+
+        UserDTO userDTO = getCurrentUser(token);
+
+        if (!userDTO.getRole().equals(1)) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar o equipamento.");
+        }
+
+        Asset assetEdit = assetRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Equipamento não encontrado")
+        );
+
+        assetUpdateConverter.assetUpdate(assetDTO, assetEdit);
+
+        return assetConverter.assetDTO(assetRepository.save(assetEdit));
+
+
+    }
 
 }
