@@ -1,6 +1,5 @@
 package com.loupfitassetservice.asset_service.infrastructure.security;
 
-import com.loupfituserservice.userservice.infrastructure.security.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
