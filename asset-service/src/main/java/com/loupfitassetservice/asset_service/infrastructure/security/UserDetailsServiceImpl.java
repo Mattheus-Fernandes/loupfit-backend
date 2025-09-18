@@ -15,12 +15,12 @@ public class UserDetailsServiceImpl {
     private UserClient userClient;
 
     public UserDetails dataUser(String token, String username) {
-
-        UserDTO userDTO = userClient.findUserByUsername(token, username);
+        String bearerToken = "Bearer " + token;
+        UserDTO userDTO = userClient.findUserByUsername(bearerToken, username);
 
         return User
                 .withUsername(userDTO.getUsername())
-                .password(userDTO.getPassword())
+                .password("N/A")
                 .build();
     }
 }
