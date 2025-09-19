@@ -62,6 +62,11 @@ public class UserController {
         return ResponseEntity.ok(userService.filterByRole(role));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<UserDTO> findUserByUsername(@RequestParam("username") String username) {
+        return ResponseEntity.ok(userService.filterByUsername(username));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.removeUser(id));
