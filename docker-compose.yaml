@@ -1,0 +1,59 @@
+version: "3.8"
+
+networks:
+  loupfit-network:
+    driver: bridge
+
+services:
+  # User service DB
+  userdb-postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5433:5432"
+    networks:
+      - loupfit-network
+
+  # User service
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "${USER_SERVICE_PORT}:8080"
+    depends_on:
+      - userdb-postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://userdb-postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - loupfit-network
+
+  # Asset service DB
+  assetdb-mongodb:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    ports:
+      - "27018:27017"
+    networks:
+      - loupfit-network
+
+  # Asset service
+  asset-service:
+    build: ./asset-service
+    container_name: asset-service
+    ports:
+      - "${ASSET_SERVICE_PORT}:8081"
+    depends_on:
+      - assetdb-mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI:  mongodb://assetdb-mongodb:27017/${MONGO_DB}
+    networks:
+      - loupfit-network
