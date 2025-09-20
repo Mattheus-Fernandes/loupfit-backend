@@ -3,6 +3,7 @@ package com.loupfitconsumablesservice.consumables_service.business;
 import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesDTO;
 import com.loupfitconsumablesservice.consumables_service.business.dto.UserDTO;
 import com.loupfitconsumablesservice.consumables_service.business.mapper.ComsumablesConverter;
+import com.loupfitconsumablesservice.consumables_service.business.mapper.ConsumablesUpdateConverter;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.client.UserClient;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.entity.Consumables;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ConflictExcpetion;
@@ -21,6 +22,7 @@ public class ConsumablesService {
     private final ConsumablesRepository consumablesRepository;
     private final UserClient userClient;
     private final ComsumablesConverter consumablesConverter;
+    private final ConsumablesUpdateConverter consumablesUpdateConverter;
 
     private UserDTO getCurrentUser(String token) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -47,5 +49,22 @@ public class ConsumablesService {
 
     public List<ConsumablesDTO> filterAllConsumables() {
         return consumablesConverter.consumablesDTOList(consumablesRepository.findAll());
+    }
+
+    public ConsumablesDTO editConsumable(String token, String id, ConsumablesDTO consumablesDTO) {
+
+        UserDTO userDTO = getCurrentUser(token);
+
+        if (!userDTO.getRole().equals(1)) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumivéis.");
+        }
+
+        Consumables consumableEdit = consumablesRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Consumivel não encontrado")
+        );
+
+        consumablesUpdateConverter.consumableUpdate(consumablesDTO, consumableEdit);
+
+        return consumablesConverter.consumablesDTO(consumablesRepository.save(consumableEdit));
     }
 }
