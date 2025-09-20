@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/consumables")
 @RequiredArgsConstructor
@@ -19,5 +21,10 @@ public class ConsumablesController {
             @RequestBody ConsumablesDTO consumablesDTO
     ) {
         return ResponseEntity.ok(consumablesService.addConsumable(token, consumablesDTO));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ConsumablesDTO>> findAllConsumables() {
+        return ResponseEntity.ok(consumablesService.filterAllConsumables());
     }
 }
