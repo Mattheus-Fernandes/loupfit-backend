@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: db_consumables
+    restart: always
+    ports:
+      - "27019:27017"
+    environment:
+      MONGO_INITDB_DATABASE: db_consumables
+
+  consumables-service:
+    build: .
+    container_name: consumable-service
+    restart: always
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/db_consumables
+
+networks:
+  default:
+    external: true
+    name: loupfit-network

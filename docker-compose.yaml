@@ -54,6 +54,30 @@ services:
     depends_on:
       - assetdb-mongodb
     environment:
-      SPRING_DATA_MONGODB_URI:  mongodb://assetdb-mongodb:27017/${MONGO_DB}
+      SPRING_DATA_MONGODB_URI: mongodb://assetdb-mongodb:27017/${MONGO_DB}
     networks:
       - loupfit-network
+
+  # Consumables service DB
+  consumablesdb-mongodb:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_CONSUMABLES}
+    ports:
+      - "27019:27017"
+    networks:
+      - loupfit-network
+
+  # Consumables service
+  consumables-service:
+      build: ./consumables-service
+      container_name: consumables-service
+      ports:
+        - "${CONSUMABLES_SERVICE_PORT}:8082"
+      depends_on:
+        - consumablesdb-mongodb
+      environment:
+        SPRING_DATA_MONGODB_URI: mongodb://consumablesdb-mongodb:27017/${MONGO_DB_CONSUMABLES}
+      networks:
+        - loupfit-network
