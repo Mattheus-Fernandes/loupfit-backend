@@ -52,16 +52,32 @@ public class ConsumablesService {
         return consumablesConverter.consumablesDTOList(consumablesRepository.findAll());
     }
 
+    public ConsumablesDTO removeConsumable(String token, String id) {
+        UserDTO userDTO = getCurrentUser(token);
+
+        if (!userDTO.getRole().equals(1)) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir consumíveis.");
+        }
+
+        Consumables consumableDelete = consumablesRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Consumivel não encontrado")
+        );
+
+        consumablesRepository.delete(consumableDelete);
+
+        return consumablesConverter.consumablesDTO(consumableDelete);
+    }
+
     public ConsumablesDTO editConsumable(String token, String id, ConsumablesDTO consumablesDTO) {
 
         UserDTO userDTO = getCurrentUser(token);
 
         if (!userDTO.getRole().equals(1)) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumivéis.");
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
         }
 
         Consumables consumableEdit = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Consumivel não encontrado")
+                () -> new ConflictExcpetion("Consumível não encontrado")
         );
 
         consumablesUpdateConverter.consumableUpdate(consumablesDTO, consumableEdit);
@@ -74,11 +90,11 @@ public class ConsumablesService {
         UserDTO userDTO = getCurrentUser(token);
 
         if (!userDTO.getRole().equals(1)) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumivéis.");
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
         }
 
         Consumables consumableQuantity = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Consumivel não encontrado")
+                () -> new ConflictExcpetion("Consumível não encontrado")
         );
 
         if ("DECREASE".equalsIgnoreCase(consumablesQuantityDTO.getOperation())) {
