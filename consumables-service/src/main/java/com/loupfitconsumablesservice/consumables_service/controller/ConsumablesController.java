@@ -29,6 +29,14 @@ public class ConsumablesController {
         return ResponseEntity.ok(consumablesService.filterAllConsumables());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ConsumablesDTO> deleteConsumables(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(consumablesService.removeConsumable(token, id));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ConsumablesDTO> updateConsumables(
             @RequestHeader("Authorization") String token,
