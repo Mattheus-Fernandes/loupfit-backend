@@ -1,6 +1,7 @@
 package com.loupfitconsumablesservice.consumables_service.business;
 
 import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesDTO;
+import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesQuantityDTO;
 import com.loupfitconsumablesservice.consumables_service.business.dto.UserDTO;
 import com.loupfitconsumablesservice.consumables_service.business.mapper.ComsumablesConverter;
 import com.loupfitconsumablesservice.consumables_service.business.mapper.ConsumablesUpdateConverter;
@@ -66,5 +67,33 @@ public class ConsumablesService {
         consumablesUpdateConverter.consumableUpdate(consumablesDTO, consumableEdit);
 
         return consumablesConverter.consumablesDTO(consumablesRepository.save(consumableEdit));
+    }
+
+    public ConsumablesDTO editQuantityConsumable(String token, String id, ConsumablesQuantityDTO consumablesQuantityDTO) {
+
+        UserDTO userDTO = getCurrentUser(token);
+
+        if (!userDTO.getRole().equals(1)) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumivéis.");
+        }
+
+        Consumables consumableQuantity = consumablesRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Consumivel não encontrado")
+        );
+
+        if ("DECREASE".equalsIgnoreCase(consumablesQuantityDTO.getOperation())) {
+
+            if (consumableQuantity.getQuantity() < consumablesQuantityDTO.getQuantity()) {
+                throw new ConflictExcpetion("Estoque insuficiente para realizar a operação");
+            }
+
+            consumableQuantity.setQuantity(consumableQuantity.getQuantity() - consumablesQuantityDTO.getQuantity());
+        }
+
+        if ("INCREASE".equalsIgnoreCase(consumablesQuantityDTO.getOperation())) {
+            consumableQuantity.setQuantity(consumableQuantity.getQuantity() + consumablesQuantityDTO.getQuantity());
+        }
+
+        return consumablesConverter.consumablesDTO(consumablesRepository.save(consumableQuantity));
     }
 }

@@ -2,6 +2,7 @@ package com.loupfitconsumablesservice.consumables_service.controller;
 
 import com.loupfitconsumablesservice.consumables_service.business.ConsumablesService;
 import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesDTO;
+import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesQuantityDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +36,14 @@ public class ConsumablesController {
             @PathVariable String id
     ) {
          return ResponseEntity.ok(consumablesService.editConsumable(token, id, consumablesDTO));
+    }
+
+    @PatchMapping("/{id}/quantity")
+    public ResponseEntity<ConsumablesDTO> updateConsumablesQuantity(
+            @RequestHeader("Authorization") String token,
+            @RequestBody ConsumablesQuantityDTO consumablesQuantityDTO,
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(consumablesService.editQuantityConsumable(token, id, consumablesQuantityDTO));
     }
 }
