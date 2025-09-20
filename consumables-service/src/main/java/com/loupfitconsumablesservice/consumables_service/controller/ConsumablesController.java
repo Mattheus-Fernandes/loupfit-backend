@@ -27,4 +27,13 @@ public class ConsumablesController {
     public ResponseEntity<List<ConsumablesDTO>> findAllConsumables() {
         return ResponseEntity.ok(consumablesService.filterAllConsumables());
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ConsumablesDTO> updateConsumables(
+            @RequestHeader("Authorization") String token,
+            @RequestBody ConsumablesDTO consumablesDTO,
+            @PathVariable String id
+    ) {
+         return ResponseEntity.ok(consumablesService.editConsumable(token, id, consumablesDTO));
+    }
 }
