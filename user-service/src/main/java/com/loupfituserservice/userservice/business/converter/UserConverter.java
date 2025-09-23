@@ -1,8 +1,7 @@
 package com.loupfituserservice.userservice.business.converter;
 
-import com.loupfituserservice.userservice.business.dto.UserCreateDTO;
-import com.loupfituserservice.userservice.business.dto.UserDTO;
-import com.loupfituserservice.userservice.business.dto.UserEditDTO;
+import com.loupfituserservice.userservice.business.dto.user.UserReqDTO;
+import com.loupfituserservice.userservice.business.dto.user.UserDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,45 +13,45 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserConverter {
 
-    public User userCreate(UserCreateDTO userCreateDTO) {
+    public User userCreate(UserReqDTO dto) {
         return User.builder()
-                .name(userCreateDTO.getName())
-                .lastname(userCreateDTO.getLastname())
-                .username(userCreateDTO.getUsername())
-                .password(userCreateDTO.getPassword())
-                .role(userCreateDTO.getRole())
+                .name(dto.getName())
+                .lastname(dto.getLastname())
+                .username(dto.getUsername())
+                .password(dto.getPassword())
+                .role(dto.getRole())
                 .build();
     }
 
-    public UserDTO userDTO(User user) {
+    public UserDTO userDTO(User entity) {
         return UserDTO.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .lastname(user.getLastname())
-                .username(user.getUsername())
-                .role(user.getRole())
+                .id(entity.getId())
+                .name(entity.getName())
+                .lastname(entity.getLastname())
+                .username(entity.getUsername())
+                .role(entity.getRole())
                 .build();
     }
 
-    public List<UserDTO> userDTOList(List<User> users) {
+    public List<UserDTO> userDTOList(List<User> entities) {
 
         List<UserDTO> userDTOList = new ArrayList<UserDTO>();
 
-        for (User user : users) {
+        for (User user : entities) {
             userDTOList.add(userDTO(user));
         }
 
         return userDTOList;
     }
 
-    public User userUpdate(UserEditDTO userEditDTO, User user) {
+    public User userUpdate(UserReqDTO dto, User entity) {
         return User.builder()
-                .id(user.getId())
-                .name(userEditDTO.getName() != null ? userEditDTO.getName() : user.getName())
-                .lastname(userEditDTO.getLastname() != null ? userEditDTO.getLastname() : user.getLastname())
-                .username(userEditDTO.getUsername() != null ? userEditDTO.getUsername() : user.getUsername())
-                .password(userEditDTO.getPassword() != null ? userEditDTO.getPassword() : user.getPassword())
-                .role(userEditDTO.getRole() != null ? userEditDTO.getRole() : user.getRole())
+                .id(entity.getId())
+                .name(dto.getName() != null ? dto.getName() : entity.getName())
+                .lastname(dto.getLastname() != null ? dto.getLastname() : entity.getLastname())
+                .username(dto.getUsername() != null ? dto.getUsername() : entity.getUsername())
+                .password(dto.getPassword() != null ? dto.getPassword() : entity.getPassword())
+                .role(dto.getRole() != null ? dto.getRole() : entity.getRole())
                 .build();
     }
 

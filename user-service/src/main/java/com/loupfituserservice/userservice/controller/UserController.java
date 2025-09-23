@@ -1,9 +1,8 @@
 package com.loupfituserservice.userservice.controller;
 
 import com.loupfituserservice.userservice.business.UserService;
-import com.loupfituserservice.userservice.business.dto.UserCreateDTO;
-import com.loupfituserservice.userservice.business.dto.UserDTO;
-import com.loupfituserservice.userservice.business.dto.UserEditDTO;
+import com.loupfituserservice.userservice.business.dto.user.UserReqDTO;
+import com.loupfituserservice.userservice.business.dto.user.UserDTO;
 import com.loupfituserservice.userservice.business.dto.UserLoginDTO;
 import com.loupfituserservice.userservice.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,7 @@ public class UserController {
     private final JwtUtil jwtUtil;
 
     @PostMapping
-    public ResponseEntity<UserDTO> saveUser(@RequestBody UserCreateDTO newUser) {
+    public ResponseEntity<UserDTO> saveUser(@RequestBody UserReqDTO newUser) {
         return ResponseEntity.ok(userService.addUser(newUser));
     }
 
@@ -52,14 +51,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> findUser(@RequestParam(required = false) Long role) {
-
-        if (role == null) {
-            return ResponseEntity.ok(userService.filterAllUsers());
-
-        }
-
-        return ResponseEntity.ok(userService.filterByRole(role));
+    public ResponseEntity<List<UserDTO>> findUser() {
+        return ResponseEntity.ok(userService.filterAllUsers());
     }
 
     @GetMapping("/search")
@@ -75,7 +68,7 @@ public class UserController {
     @PutMapping("{id}")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
-            @RequestBody UserEditDTO userEditDTO
+            @RequestBody UserReqDTO userEditDTO
     ) {
 
         return ResponseEntity.ok(userService.editUser(id, userEditDTO));
