@@ -1,5 +1,6 @@
-package com.loupfituserservice.userservice.business.dto;
+package com.loupfituserservice.userservice.business.dto.user;
 
+import com.loupfituserservice.userservice.infrastructure.enums.UserRole;
 import lombok.*;
 
 @AllArgsConstructor
@@ -7,11 +8,11 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-public class UserEditDTO {
+public class UserReqDTO {
 
     private String name;
     private String lastname;
     private String username;
     private String password;
-    private Long role;
+    private UserRole role;
 }

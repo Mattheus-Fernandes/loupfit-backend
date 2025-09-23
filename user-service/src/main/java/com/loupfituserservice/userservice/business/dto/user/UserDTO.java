@@ -1,5 +1,6 @@
-package com.loupfituserservice.userservice.business.dto;
+package com.loupfituserservice.userservice.business.dto.user;
 
+import com.loupfituserservice.userservice.infrastructure.enums.UserRole;
 import lombok.*;
 
 @AllArgsConstructor
@@ -13,5 +14,5 @@ public class UserDTO {
     private String name;
     private String lastname;
     private String username;
-    private Long role;
+    private UserRole role;
 }
