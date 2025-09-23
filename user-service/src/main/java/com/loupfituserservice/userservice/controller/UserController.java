@@ -3,7 +3,7 @@ package com.loupfituserservice.userservice.controller;
 import com.loupfituserservice.userservice.business.UserService;
 import com.loupfituserservice.userservice.business.dto.user.UserReqDTO;
 import com.loupfituserservice.userservice.business.dto.user.UserDTO;
-import com.loupfituserservice.userservice.business.dto.UserLoginDTO;
+import com.loupfituserservice.userservice.business.dto.LoginDTO;
 import com.loupfituserservice.userservice.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,31 +23,10 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
 
     @PostMapping
     public ResponseEntity<UserDTO> saveUser(@RequestBody UserReqDTO newUser) {
         return ResponseEntity.ok(userService.addUser(newUser));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> doLogin(@RequestBody UserLoginDTO userLogin) {
-
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword())
-            );
-
-            String token = jwtUtil.generateToken(authentication.getName());
-
-            return ResponseEntity.ok(token);
-
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Senha incorreta");
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
-        }
     }
 
     @GetMapping
