@@ -53,4 +53,18 @@ public class EmployeeService {
         return employeeConverter.employeeDTOList(employeeRepository.findAll());
     }
 
+    public EmployeeDTO filterByUsername(String username) {
+        try {
+
+            return employeeConverter.employeeDTO(
+                    employeeRepository.findByUsername(username).orElseThrow(
+                            () -> new ConflictExcpetion("Usuário não encontrado")
+                    )
+            );
+
+        } catch (ConflictExcpetion e) {
+            throw new ConflictExcpetion(e.getMessage());
+        }
+    }
+
 }

@@ -26,4 +26,11 @@ public class EmployeeController {
     public ResponseEntity<List<EmployeeDTO>> findAllEmployees() {
         return ResponseEntity.ok(employeeService.filterAllEmployees());
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<EmployeeDTO> findByUsername(
+            @RequestParam(required = true) String username
+    ) {
+        return ResponseEntity.ok(employeeService.filterByUsername(username));
+    }
 }
