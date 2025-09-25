@@ -5,6 +5,7 @@ import com.loupfituserservice.userservice.business.dto.user.UserReqDTO;
 import com.loupfituserservice.userservice.business.dto.user.UserDTO;
 import com.loupfituserservice.userservice.business.dto.LoginDTO;
 import com.loupfituserservice.userservice.business.dto.user.UserRoleDTO;
+import com.loupfituserservice.userservice.business.dto.user.UsernameDTO;
 import com.loupfituserservice.userservice.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,14 @@ public class UserController {
             @RequestBody UserRoleDTO dto
     ) {
         return ResponseEntity.ok(userService.editRoleUser(id, dto));
+    }
+
+    @PatchMapping("/{id}/username")
+    public ResponseEntity<UserDTO> updateUsernameUser(
+            @PathVariable Long id,
+            @RequestBody UsernameDTO dto
+    ) {
+        return ResponseEntity.ok(userService.editUsername(id, dto));
     }
 
 
