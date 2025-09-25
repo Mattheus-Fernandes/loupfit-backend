@@ -4,6 +4,7 @@ import com.loupfituserservice.userservice.business.UserService;
 import com.loupfituserservice.userservice.business.dto.user.UserReqDTO;
 import com.loupfituserservice.userservice.business.dto.user.UserDTO;
 import com.loupfituserservice.userservice.business.dto.LoginDTO;
+import com.loupfituserservice.userservice.business.dto.user.UserRoleDTO;
 import com.loupfituserservice.userservice.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class UserController {
         return ResponseEntity.ok(userService.removeUser(id));
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
             @RequestBody UserReqDTO userEditDTO
@@ -52,4 +53,14 @@ public class UserController {
 
         return ResponseEntity.ok(userService.editUser(id, userEditDTO));
     }
+
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<UserDTO> updateRoleUser(
+            @PathVariable Long id,
+            @RequestBody UserRoleDTO dto
+    ) {
+        return ResponseEntity.ok(userService.editRoleUser(id, dto));
+    }
+
+
 }
