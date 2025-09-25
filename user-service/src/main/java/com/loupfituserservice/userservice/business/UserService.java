@@ -22,16 +22,6 @@ public class UserService {
     private final UserConverter userConverter;
     private final PasswordEncoder passwordEncoder;
 
-    private User userLogged() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String user = authentication.getName();
-
-        return userRepository.findByUsername(user).orElseThrow(
-                () -> new ConflictExcpetion("Usuário logado não encontrado")
-        );
-    }
-
     public UserDTO addUser(UserReqDTO dto) {
         existUsername(dto.getUsername());
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -74,12 +64,6 @@ public class UserService {
 
     public UserDTO removeUser(Long id) {
 
-        User user = userLogged();
-
-        if (!user.getRole().equals(1L)) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir usuário.");
-        }
-
         User userDelete = userRepository.findById(id).orElseThrow(
                 () -> new ConflictExcpetion("Usuário não encontrado")
         );
@@ -90,12 +74,6 @@ public class UserService {
     }
 
     public UserDTO editUser(Long id, UserReqDTO dto) {
-
-        User user = userLogged();
-
-        if (!user.getRole().equals(1L)) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar usuário.");
-        }
 
         dto.setPassword(dto.getPassword() != null ? passwordEncoder.encode(dto.getPassword()) : null);
 
