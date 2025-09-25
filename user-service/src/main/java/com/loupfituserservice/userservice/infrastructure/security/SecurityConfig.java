@@ -38,9 +38,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login").permitAll()
+                        //User
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/employee").permitAll()
-                        .requestMatchers("/user/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/user").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/user/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/user/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/user/**").hasRole("ADMIN")
+                        //Employee
+                        .requestMatchers(HttpMethod.POST, "/employee").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/employee").hasAnyRole("ADMIN", "MANAGER", "VIEWER")
+                        .requestMatchers(HttpMethod.PUT, "/employee/**").hasAnyRole("ADMIN", "MANAGER", "EDITOR")
+                        .requestMatchers(HttpMethod.PATCH, "/employee/**").hasAnyRole("ADMIN", "MANAGER", "EDITOR")
+                        .requestMatchers(HttpMethod.DELETE, "/employee/**").hasAnyRole("ADMIN", "MANAGER")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
