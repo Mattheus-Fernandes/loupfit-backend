@@ -6,6 +6,9 @@ import com.loupfituserservice.userservice.infrastructure.entity.Employee;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class EmployeeConverter {
@@ -36,6 +39,18 @@ public class EmployeeConverter {
                 .role(entity.getRole())
                 .active(entity.getActive())
                 .build();
+    }
+
+    public List<EmployeeDTO> employeeDTOList(List<Employee> entities) {
+
+        List<EmployeeDTO> employeeDTOList = new ArrayList<EmployeeDTO>();
+
+        for (Employee employee: entities) {
+            employeeDTOList.add(employeeDTO(employee));
+        }
+
+        return employeeDTOList;
+
     }
 
 }

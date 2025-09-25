@@ -6,10 +6,9 @@ import com.loupfituserservice.userservice.business.dto.employee.EmployeeDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/employee")
@@ -21,5 +20,10 @@ public class EmployeeController {
     @PostMapping
     public ResponseEntity<EmployeeDTO> saveEmployee(@RequestBody EmployeeCreateDTO dto) {
         return ResponseEntity.ok(employeeService.addEmployee(dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<EmployeeDTO>> findAllEmployees() {
+        return ResponseEntity.ok(employeeService.filterAllEmployees());
     }
 }
