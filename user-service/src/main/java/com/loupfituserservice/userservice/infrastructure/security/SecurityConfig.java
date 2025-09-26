@@ -50,7 +50,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/employee/**").hasAnyRole("ADMIN", "MANAGER", "EDITOR")
                         .requestMatchers(HttpMethod.PATCH, "/employee/**").hasAnyRole("ADMIN", "MANAGER", "EDITOR")
                         .requestMatchers(HttpMethod.DELETE, "/employee/**").hasAnyRole("ADMIN", "MANAGER")
-
+                        //Customer
+                        .requestMatchers(HttpMethod.POST, "/customer").permitAll()
+                        .requestMatchers("/customer/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

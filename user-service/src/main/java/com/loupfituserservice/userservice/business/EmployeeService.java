@@ -35,17 +35,17 @@ public class EmployeeService {
     public void validateEmployee(EmployeeReqDTO dto) {
 
         if (employeeRepository.existsByUsername(dto.getUsername())) {
-            throw new ConflictExcpetion("Já existe funcionário com esse usuário " + dto.getUsername());
+            throw new ConflictExcpetion("Já existe funcionário(a) com esse usuário " + dto.getUsername());
 
         }
 
         if (employeeRepository.existsByEmail(dto.getEmail())) {
-            throw new ConflictExcpetion("Já existe funcionário com esse e-mail " + dto.getEmail());
+            throw new ConflictExcpetion("Já existe funcionário(a) com esse e-mail " + dto.getEmail());
 
         }
 
         if (employeeRepository.existsByCpf(dto.getCpf())) {
-            throw new ConflictExcpetion("Já existe funcionário com esse CPF " + dto.getCpf());
+            throw new ConflictExcpetion("Já existe funcionário(a) com esse CPF " + dto.getCpf());
 
         }
 
