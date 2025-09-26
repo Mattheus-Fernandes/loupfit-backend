@@ -34,3 +34,6 @@ build/
 
 ### Docker ###
 .env
+
+### Security ###
+user-service/src/main/resources/application.properties
