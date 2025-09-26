@@ -3,6 +3,7 @@ package com.loupfituserservice.userservice.controller;
 import com.loupfituserservice.userservice.business.EmployeeService;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeReqDTO;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeDTO;
+import com.loupfituserservice.userservice.business.dto.employee.EmployeeRoleDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +40,13 @@ public class EmployeeController {
             @RequestBody EmployeeReqDTO dto
     ) {
         return ResponseEntity.ok(employeeService.editEmployee(id, dto));
+    }
+
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<EmployeeDTO> updateRoleEmployee(
+            @PathVariable Long id,
+            @RequestBody EmployeeRoleDTO dto
+    ) {
+        return ResponseEntity.ok(employeeService.editRoleEmployee(id, dto));
     }
 }

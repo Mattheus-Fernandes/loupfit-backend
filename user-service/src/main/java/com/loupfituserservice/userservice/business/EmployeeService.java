@@ -3,6 +3,7 @@ package com.loupfituserservice.userservice.business;
 import com.loupfituserservice.userservice.business.converter.EmployeeConverter;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeReqDTO;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeDTO;
+import com.loupfituserservice.userservice.business.dto.employee.EmployeeRoleDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.Employee;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfituserservice.userservice.infrastructure.repository.EmployeeRepository;
@@ -78,6 +79,20 @@ public class EmployeeService {
         Employee entityEdit = employeeConverter.employeeUpdate(dto, entity);
 
         return employeeConverter.employeeDTO(employeeRepository.save(entityEdit));
+    }
+
+    public EmployeeDTO editRoleEmployee(Long id, EmployeeRoleDTO dto) {
+
+        Employee entity = employeeRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Usuário não encontrado")
+        );
+
+        if (dto.getRole() != null) {
+            entity.setRole(dto.getRole());
+
+        }
+
+        return employeeConverter.employeeDTO(employeeRepository.save(entity));
     }
 
 }
