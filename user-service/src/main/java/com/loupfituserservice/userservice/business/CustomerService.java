@@ -85,4 +85,14 @@ public class CustomerService {
         return customerConverter.customerDTO(customerRepository.save(entityEdit));
 
     }
+
+    public CustomerDTO removeCustomer(Long id) {
+        Customer entity = customerRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Usuário não encontrado")
+        );
+
+        customerRepository.deleteById(id);
+
+        return customerConverter.customerDTO(entity);
+    }
 }
