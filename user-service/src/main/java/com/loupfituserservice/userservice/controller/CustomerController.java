@@ -5,10 +5,9 @@ import com.loupfituserservice.userservice.business.dto.customer.CustomerDTO;
 import com.loupfituserservice.userservice.business.dto.customer.CustomerReqDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/customer")
@@ -20,5 +19,10 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<CustomerDTO> saveCustomer(@RequestBody CustomerReqDTO dto) {
         return ResponseEntity.ok(customerService.addCustomer(dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CustomerDTO>> findAllCustomers() {
+        return  ResponseEntity.ok(customerService.filterAllCustomers());
     }
 }

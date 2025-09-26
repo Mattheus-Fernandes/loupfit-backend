@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
@@ -45,4 +47,10 @@ public class CustomerService {
         }
 
     }
+
+    public List<CustomerDTO> filterAllCustomers() {
+        return customerConverter.customerDTOList(customerRepository.findAll());
+    }
+
+
 }

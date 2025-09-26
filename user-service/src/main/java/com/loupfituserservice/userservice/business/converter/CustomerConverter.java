@@ -6,6 +6,9 @@ import com.loupfituserservice.userservice.infrastructure.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CustomerConverter {
@@ -44,6 +47,16 @@ public class CustomerConverter {
                 .number(entity.getNumber())
                 .uf(entity.getUf())
                 .build();
+    }
+
+    public List<CustomerDTO> customerDTOList(List<Customer> entities) {
+        List<CustomerDTO> customerDTOS = new ArrayList<CustomerDTO>();
+
+        for (Customer customer: entities) {
+            customerDTOS.add(customerDTO(customer));
+        }
+
+        return customerDTOS;
     }
 
 }
