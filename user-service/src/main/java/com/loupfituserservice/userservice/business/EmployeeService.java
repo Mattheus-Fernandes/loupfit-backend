@@ -110,4 +110,14 @@ public class EmployeeService {
         return employeeConverter.employeeDTO(employeeRepository.save(entity));
     }
 
+    public EmployeeDTO removeEmployee(Long id) {
+        Employee entity = employeeRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Usuário não encontrado")
+        );
+
+        employeeRepository.deleteById(id);
+
+        return employeeConverter.employeeDTO(entity);
+    }
+
 }

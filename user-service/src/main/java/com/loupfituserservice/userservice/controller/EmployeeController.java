@@ -58,4 +58,11 @@ public class EmployeeController {
     ) {
         return ResponseEntity.ok(employeeService.editActiveEmployee(id, dto));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<EmployeeDTO> deleteEmployee(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(employeeService.removeEmployee(id));
+    }
 }
