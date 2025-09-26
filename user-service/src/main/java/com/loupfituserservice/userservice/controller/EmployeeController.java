@@ -1,6 +1,7 @@
 package com.loupfituserservice.userservice.controller;
 
 import com.loupfituserservice.userservice.business.EmployeeService;
+import com.loupfituserservice.userservice.business.dto.employee.EmployeeActiveDTO;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeReqDTO;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeDTO;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeRoleDTO;
@@ -48,5 +49,13 @@ public class EmployeeController {
             @RequestBody EmployeeRoleDTO dto
     ) {
         return ResponseEntity.ok(employeeService.editRoleEmployee(id, dto));
+    }
+
+    @PatchMapping("/{id}/active")
+    public ResponseEntity<EmployeeDTO> updateActiveEmployee(
+            @PathVariable Long id,
+            @RequestBody EmployeeActiveDTO dto
+    ) {
+        return ResponseEntity.ok(employeeService.editActiveEmployee(id, dto));
     }
 }
