@@ -23,21 +23,21 @@ public class Customer {
     private String lastname;
 
     @Column(name = "gender", nullable = false)
-    private char gender;
+    private Character gender;
 
-    @Column(name = "username", nullable = false, unique = true)
+    @Column(name = "username", nullable = false)
     private String username;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = false)
     private String email;
 
     @Column(name = "phone", nullable = false)
     private String phone;
 
-    @Column(name = "cpf", nullable = false, unique = true)
+    @Column(name = "cpf", nullable = false)
     private String cpf;
 
     @Column(name = "city", nullable = false)

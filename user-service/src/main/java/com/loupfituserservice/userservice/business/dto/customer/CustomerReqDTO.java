@@ -11,7 +11,7 @@ public class CustomerReqDTO {
 
     private String name;
     private String lastname;
-    private char gender;
+    private Character gender;
     private String username;
     private String password;
     private String email;
