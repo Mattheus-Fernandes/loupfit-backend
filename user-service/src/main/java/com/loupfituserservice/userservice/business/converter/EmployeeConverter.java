@@ -1,6 +1,6 @@
 package com.loupfituserservice.userservice.business.converter;
 
-import com.loupfituserservice.userservice.business.dto.employee.EmployeeCreateDTO;
+import com.loupfituserservice.userservice.business.dto.employee.EmployeeReqDTO;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.Employee;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmployeeConverter {
 
-    public Employee createEmployee(EmployeeCreateDTO dto) {
+    public Employee createEmployee(EmployeeReqDTO dto) {
         return Employee.builder()
                 .name(dto.getName())
                 .lastname(dto.getLastname())
@@ -45,12 +45,27 @@ public class EmployeeConverter {
 
         List<EmployeeDTO> employeeDTOList = new ArrayList<EmployeeDTO>();
 
-        for (Employee employee: entities) {
+        for (Employee employee : entities) {
             employeeDTOList.add(employeeDTO(employee));
         }
 
         return employeeDTOList;
 
+    }
+
+    public Employee employeeUpdate(EmployeeReqDTO dto, Employee entity) {
+        return Employee.builder()
+                .id(entity.getId())
+                .name(dto.getName() != null ? dto.getName() : entity.getName())
+                .lastname(dto.getLastname() != null ? dto.getLastname() : entity.getLastname())
+                .username(dto.getUsername() != null ? dto.getUsername() : entity.getUsername())
+                .password(dto.getPassword() != null ? dto.getPassword() : entity.getPassword())
+                .email(dto.getEmail() != null ? dto.getEmail() : entity.getEmail())
+                .phone(dto.getPhone() != null ? dto.getPhone() : entity.getPhone())
+                .cpf(dto.getCpf() != null ? dto.getCpf() : entity.getCpf())
+                .role(dto.getRole() != null ? dto.getRole() : entity.getRole())
+                .active(dto.getActive() != null ? dto.getActive() : entity.getActive())
+                .build();
     }
 
 }

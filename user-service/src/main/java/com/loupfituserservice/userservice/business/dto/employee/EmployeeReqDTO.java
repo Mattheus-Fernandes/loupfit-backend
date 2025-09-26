@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class EmployeeCreateDTO {
+public class EmployeeReqDTO {
 
     private String name;
     private String lastname;

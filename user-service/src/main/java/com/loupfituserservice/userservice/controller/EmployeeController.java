@@ -1,11 +1,10 @@
 package com.loupfituserservice.userservice.controller;
 
 import com.loupfituserservice.userservice.business.EmployeeService;
-import com.loupfituserservice.userservice.business.dto.employee.EmployeeCreateDTO;
+import com.loupfituserservice.userservice.business.dto.employee.EmployeeReqDTO;
 import com.loupfituserservice.userservice.business.dto.employee.EmployeeDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @PostMapping
-    public ResponseEntity<EmployeeDTO> saveEmployee(@RequestBody EmployeeCreateDTO dto) {
+    public ResponseEntity<EmployeeDTO> saveEmployee(@RequestBody EmployeeReqDTO dto) {
         return ResponseEntity.ok(employeeService.addEmployee(dto));
     }
 
@@ -32,5 +31,13 @@ public class EmployeeController {
             @RequestParam(required = true) String username
     ) {
         return ResponseEntity.ok(employeeService.filterByUsername(username));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeDTO> updateEmployee(
+            @PathVariable Long id,
+            @RequestBody EmployeeReqDTO dto
+    ) {
+        return ResponseEntity.ok(employeeService.editEmployee(id, dto));
     }
 }
