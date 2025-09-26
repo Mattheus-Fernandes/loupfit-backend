@@ -25,4 +25,10 @@ public class CustomerController {
     public ResponseEntity<List<CustomerDTO>> findAllCustomers() {
         return  ResponseEntity.ok(customerService.filterAllCustomers());
     }
+
+
+    @GetMapping("/current")
+    public ResponseEntity<CustomerDTO> findByCurrentUser() {
+        return ResponseEntity.ok(customerService.filterCurrentUser());
+    }
 }

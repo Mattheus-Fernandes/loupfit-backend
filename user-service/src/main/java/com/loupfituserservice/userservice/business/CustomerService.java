@@ -7,6 +7,8 @@ import com.loupfituserservice.userservice.infrastructure.entity.Customer;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfituserservice.userservice.infrastructure.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,5 +54,14 @@ public class CustomerService {
         return customerConverter.customerDTOList(customerRepository.findAll());
     }
 
+    public CustomerDTO filterCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
 
+        Customer entity = customerRepository.findByUsername(username).orElseThrow(
+                () -> new ConflictExcpetion("Usuário não encontrado " + username)
+        );
+
+        return customerConverter.customerDTO(entity);
+    }
 }
