@@ -26,9 +26,15 @@ public class CustomerController {
         return  ResponseEntity.ok(customerService.filterAllCustomers());
     }
 
-
     @GetMapping("/current")
     public ResponseEntity<CustomerDTO> findByCurrentUser() {
         return ResponseEntity.ok(customerService.filterCurrentUser());
+    }
+
+    @PutMapping
+    public ResponseEntity<CustomerDTO> updateCustomer(
+            @RequestBody CustomerReqDTO dto
+    ){
+        return ResponseEntity.ok(customerService.editCustomer(dto));
     }
 }

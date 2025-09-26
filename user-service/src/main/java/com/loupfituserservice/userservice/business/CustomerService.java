@@ -64,4 +64,25 @@ public class CustomerService {
 
         return customerConverter.customerDTO(entity);
     }
+
+    public CustomerDTO editCustomer(CustomerReqDTO dto) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        Customer entity = customerRepository.findByUsername(username).orElseThrow(
+                () -> new ConflictExcpetion("Usuário não encontrado " + username)
+        );
+
+        Customer entityEdit = customerConverter.updateCustomer(dto, entity);
+
+        if (dto.getPassword() != null) {
+            entityEdit.setPassword(passwordEncoder.encode(dto.getPassword()));
+        } else {
+            entityEdit.setPassword(entity.getPassword());
+        }
+
+        return customerConverter.customerDTO(customerRepository.save(entityEdit));
+
+    }
 }

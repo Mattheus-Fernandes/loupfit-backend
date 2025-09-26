@@ -59,4 +59,23 @@ public class CustomerConverter {
         return customerDTOS;
     }
 
+    public Customer updateCustomer(CustomerReqDTO dto, Customer entity) {
+        return  Customer.builder()
+                .id(entity.getId())
+                .name(dto.getName() != null ? dto.getName() : entity.getName())
+                .lastname(dto.getLastname() != null ? dto.getLastname() : entity.getLastname())
+                .gender(dto.getGender() != null ? dto.getGender() : entity.getGender())
+                .username(dto.getUsername() != null ? dto.getUsername() : entity.getUsername())
+                .password(dto.getPassword() != null ? dto.getPassword() : entity.getPassword())
+                .email(dto.getEmail() != null ? dto.getEmail() : entity.getEmail())
+                .phone(dto.getPhone() != null ? dto.getPhone() : entity.getPhone())
+                .cpf(dto.getCpf() != null ? dto.getCpf() : entity.getCpf())
+                .city(dto.getCity() != null ? dto.getCity() : entity.getCity())
+                .neighbour(dto.getNeighbour() != null ? dto.getNeighbour() : entity.getNeighbour())
+                .street(dto.getStreet() != null ? dto.getStreet() : entity.getStreet())
+                .number(dto.getNumber() != null ? dto.getNumber() : entity.getNumber())
+                .uf(dto.getUf() != null ? dto.getUf() : entity.getUf())
+                .build();
+    }
+
 }
