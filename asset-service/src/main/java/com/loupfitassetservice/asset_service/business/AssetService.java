@@ -1,6 +1,7 @@
 package com.loupfitassetservice.asset_service.business;
 
 import com.loupfitassetservice.asset_service.business.dto.AssetDTO;
+import com.loupfitassetservice.asset_service.business.dto.EmployeeDTO;
 import com.loupfitassetservice.asset_service.business.dto.UserDTO;
 import com.loupfitassetservice.asset_service.business.mapper.AssetConverter;
 import com.loupfitassetservice.asset_service.business.mapper.AssetUpdateConverter;
@@ -9,7 +10,6 @@ import com.loupfitassetservice.asset_service.infrastructure.entity.Asset;
 import com.loupfitassetservice.asset_service.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfitassetservice.asset_service.infrastructure.repository.AssetRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,25 +24,47 @@ public class AssetService {
     private final UserClient userClient;
     private final AssetUpdateConverter assetUpdateConverter;
 
-    private UserDTO getCurrentUser(String token) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    private UserDTO getCurrentUser(String token, String username) {
+        return userClient.getUserByUsername(token, username);
+    }
 
-        if (auth == null) {
-            throw new ConflictExcpetion("Usuário não autenticado");
+    private EmployeeDTO getCurrentEmployee(String token, String username) {
+        return userClient.getEmployeeByUsername(token, username);
+    }
+
+    private String authenticated(String token) {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        try {
+            UserDTO userDTO = getCurrentUser(token, username);
+            if (userDTO != null && userDTO.getUsername() != null) {
+                return userDTO.getUsername();
+            }
+        } catch (Exception e) {
+            System.out.println("Proprietário(a) não encontrado(a) via Feign Client " + e.getMessage());
         }
 
-        String username = auth.getName();
+        try {
+            EmployeeDTO employeeDTO = getCurrentEmployee(token, username);
+            if (employeeDTO != null && employeeDTO.getUsername() != null) {
+                return employeeDTO.getUsername();
+            }
+        } catch (Exception e) {
+            System.out.println("Funcionário(a) não encontrado(a) via Feign Client " + e.getMessage());
+        }
 
-        return userClient.findUserByUsername(token, username);
+        throw new ConflictExcpetion("Usuário(a) ou funcionário(a) não encontrado(a) " + username);
 
     }
 
     public AssetDTO addAsset(String token, AssetDTO assetDTO) {
-        UserDTO userDTO = getCurrentUser(token);
+
+        String createdBy = authenticated(token);
 
         existAsset(assetDTO.getAssetName());
 
-        assetDTO.setCreatedBy(userDTO.getUsername());
+        assetDTO.setCreatedBy(createdBy);
 
         Asset assetEntity = assetConverter.assetEntity(assetDTO);
 
@@ -64,7 +86,7 @@ public class AssetService {
     }
 
     public List<AssetDTO> filterAllAssets() {
-       return assetConverter.assetDTOList(assetRepository.findAll());
+        return assetConverter.assetDTOList(assetRepository.findAll());
     }
 
     public List<AssetDTO> assetAddedByCreatedBy(String username) {
@@ -107,5 +129,4 @@ public class AssetService {
 
 
     }
-
 }

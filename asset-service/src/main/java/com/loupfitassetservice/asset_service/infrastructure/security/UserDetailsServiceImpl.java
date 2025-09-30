@@ -1,6 +1,7 @@
 package com.loupfitassetservice.asset_service.infrastructure.security;
 
 
+import com.loupfitassetservice.asset_service.business.dto.EmployeeDTO;
 import com.loupfitassetservice.asset_service.business.dto.UserDTO;
 import com.loupfitassetservice.asset_service.infrastructure.client.UserClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,18 @@ public class UserDetailsServiceImpl {
 
     public UserDetails dataUser(String token, String username) {
         String bearerToken = "Bearer " + token;
-        UserDTO userDTO = userClient.findUserByUsername(bearerToken, username);
-
-        return User
-                .withUsername(userDTO.getUsername())
-                .password("N/A")
-                .build();
+        try {
+            UserDTO userDTO = userClient.getUserByUsername(bearerToken, username);
+            return User.withUsername(userDTO.getUsername())
+                    .password("N/A")
+                    .roles(userDTO.getRole().name())
+                    .build();
+        } catch (Exception e) {
+            EmployeeDTO employeeDTO = userClient.getEmployeeByUsername(bearerToken, username);
+            return User.withUsername(employeeDTO.getUsername())
+                    .password("N/A")
+                    .roles(employeeDTO.getRole().name())
+                    .build();
+        }
     }
 }
