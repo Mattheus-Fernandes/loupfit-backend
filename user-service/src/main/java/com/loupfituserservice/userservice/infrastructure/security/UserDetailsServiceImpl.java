@@ -1,12 +1,9 @@
 package com.loupfituserservice.userservice.infrastructure.security;
 
 
-import com.loupfituserservice.userservice.business.dto.customer.CustomerDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.Customer;
-import com.loupfituserservice.userservice.infrastructure.entity.Employee;
 import com.loupfituserservice.userservice.infrastructure.entity.User;
 import com.loupfituserservice.userservice.infrastructure.repository.CustomerRepository;
-import com.loupfituserservice.userservice.infrastructure.repository.EmployeeRepository;
 import com.loupfituserservice.userservice.infrastructure.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,9 +18,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UserRepository userRepository;
 
     @Autowired
-    EmployeeRepository employeeRepository;
-
-    @Autowired
     CustomerRepository customerRepository;
 
     @Override
@@ -35,15 +29,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .withUsername(user.getUsername())
                     .password(user.getPassword())
                     .roles(user.getRole().name())
-                    .build();
-        }
-
-        Employee emp = employeeRepository.findByUsername(username).orElse(null);
-        if (emp != null) {
-            return org.springframework.security.core.userdetails.User
-                    .withUsername(emp.getUsername())
-                    .password(emp.getPassword())
-                    .roles(emp.getRole().name())
                     .build();
         }
 
