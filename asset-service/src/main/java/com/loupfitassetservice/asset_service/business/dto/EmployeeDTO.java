@@ -1,6 +1,6 @@
 package com.loupfitassetservice.asset_service.business.dto;
 
-import com.loupfitassetservice.asset_service.infrastructure.enums.UserRole;
+import com.loupfitassetservice.asset_service.infrastructure.enums.EmployeeRole;
 import lombok.*;
 
 @AllArgsConstructor
@@ -8,8 +8,8 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class UserDTO {
+public class EmployeeDTO {
 
     private String username;
-    private UserRole role;
+    private EmployeeRole role;
 }
