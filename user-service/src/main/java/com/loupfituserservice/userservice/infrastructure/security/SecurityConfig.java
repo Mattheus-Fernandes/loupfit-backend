@@ -40,16 +40,11 @@ public class SecurityConfig {
                         .requestMatchers("/login").permitAll()
                         //User
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/user").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.PUT, "/user/**").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/user/**").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.DELETE, "/user/**").hasRole("ADMIN")
-                        //Employee
-                        .requestMatchers(HttpMethod.POST, "/employee").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.GET, "/employee").hasAnyRole("ADMIN", "MANAGER", "VIEWER")
-                        .requestMatchers(HttpMethod.PUT, "/employee/**").hasAnyRole("ADMIN", "MANAGER", "EDITOR")
-                        .requestMatchers(HttpMethod.PATCH, "/employee/**").hasAnyRole("ADMIN", "MANAGER", "EDITOR")
-                        .requestMatchers(HttpMethod.DELETE, "/employee/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/user").hasAnyRole("OWNER", "ADMIN", "VIEWER")
+                        .requestMatchers(HttpMethod.PUT, "/user/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/user/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/user/**").hasRole("OWNER")
+
                         //Customer
                         .requestMatchers(HttpMethod.POST, "/customer").permitAll()
                         .requestMatchers("/customer/**").authenticated()
