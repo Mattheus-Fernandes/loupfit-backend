@@ -1,15 +1,17 @@
 package com.loupfitassetservice.asset_service.business;
 
 import com.loupfitassetservice.asset_service.business.dto.AssetDTO;
-import com.loupfitassetservice.asset_service.business.dto.EmployeeDTO;
+import com.loupfitassetservice.asset_service.business.dto.AuthenticatedUserDTO;
 import com.loupfitassetservice.asset_service.business.dto.UserDTO;
 import com.loupfitassetservice.asset_service.business.mapper.AssetConverter;
 import com.loupfitassetservice.asset_service.business.mapper.AssetUpdateConverter;
 import com.loupfitassetservice.asset_service.infrastructure.client.UserClient;
 import com.loupfitassetservice.asset_service.infrastructure.entity.Asset;
+import com.loupfitassetservice.asset_service.infrastructure.enums.UserRole;
 import com.loupfitassetservice.asset_service.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfitassetservice.asset_service.infrastructure.repository.AssetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,47 +26,28 @@ public class AssetService {
     private final UserClient userClient;
     private final AssetUpdateConverter assetUpdateConverter;
 
-    private UserDTO getCurrentUser(String token, String username) {
-        return userClient.getUserByUsername(token, username);
-    }
+    private AuthenticatedUserDTO userAuthenticated(String token) {
 
-    private EmployeeDTO getCurrentEmployee(String token, String username) {
-        return userClient.getEmployeeByUsername(token, username);
-    }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
 
-    private String authenticated(String token) {
+        UserDTO userDTO = userClient.getUserByUsername(token, username);
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        try {
-            UserDTO userDTO = getCurrentUser(token, username);
-            if (userDTO != null && userDTO.getUsername() != null) {
-                return userDTO.getUsername();
-            }
-        } catch (Exception e) {
-            System.out.println("Proprietário(a) não encontrado(a) via Feign Client " + e.getMessage());
+        if (userDTO != null && userDTO.getUsername() != null) {
+            return new AuthenticatedUserDTO(userDTO.getUsername(), userDTO.getRole());
         }
 
-        try {
-            EmployeeDTO employeeDTO = getCurrentEmployee(token, username);
-            if (employeeDTO != null && employeeDTO.getUsername() != null) {
-                return employeeDTO.getUsername();
-            }
-        } catch (Exception e) {
-            System.out.println("Funcionário(a) não encontrado(a) via Feign Client " + e.getMessage());
-        }
-
-        throw new ConflictExcpetion("Usuário(a) ou funcionário(a) não encontrado(a) " + username);
+        throw new ConflictExcpetion("Usuário(a) não encontrado(a) " + username);
 
     }
 
     public AssetDTO addAsset(String token, AssetDTO assetDTO) {
 
-        String createdBy = authenticated(token);
+        AuthenticatedUserDTO user = userAuthenticated(token);
 
         existAsset(assetDTO.getAssetName());
 
-        assetDTO.setCreatedBy(createdBy);
+        assetDTO.setCreatedBy(user.getUsername());
 
         Asset assetEntity = assetConverter.assetEntity(assetDTO);
 
@@ -95,9 +78,11 @@ public class AssetService {
 
     public AssetDTO removeAsset(String token, String id) {
 
-        UserDTO userDTO = getCurrentUser(token);
+        AuthenticatedUserDTO user = userAuthenticated(token);
 
-        if (!userDTO.getRole().equals(1)) {
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
+
+        if (!permitted) {
             throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir o equipamento.");
         }
 
@@ -113,9 +98,11 @@ public class AssetService {
 
     public AssetDTO editAsset(String token, String id, AssetDTO assetDTO) {
 
-        UserDTO userDTO = getCurrentUser(token);
+        AuthenticatedUserDTO user = userAuthenticated(token);
 
-        if (!userDTO.getRole().equals(1)) {
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+
+        if (!permitted) {
             throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar o equipamento.");
         }
 
