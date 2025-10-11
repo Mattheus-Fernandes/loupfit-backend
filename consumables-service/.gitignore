@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+
+consumables-service/src/main/resources/application.properties
