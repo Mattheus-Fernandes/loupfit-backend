@@ -12,7 +12,7 @@ services:
       - "5433:5432"
 
   user-service:
-    image: mattfernandes/user-service:1.0
+    image: mattfernandes/user-service:1.1
     build: .
     container_name: user-service
     ports:
