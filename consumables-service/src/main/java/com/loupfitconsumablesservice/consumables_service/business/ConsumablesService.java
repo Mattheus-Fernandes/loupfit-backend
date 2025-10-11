@@ -1,5 +1,6 @@
 package com.loupfitconsumablesservice.consumables_service.business;
 
+import com.loupfitconsumablesservice.consumables_service.business.dto.AuthenticatedUserDTO;
 import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesDTO;
 import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesQuantityDTO;
 import com.loupfitconsumablesservice.consumables_service.business.dto.UserDTO;
@@ -7,6 +8,7 @@ import com.loupfitconsumablesservice.consumables_service.business.mapper.Comsuma
 import com.loupfitconsumablesservice.consumables_service.business.mapper.ConsumablesUpdateConverter;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.client.UserClient;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.entity.Consumables;
+import com.loupfitconsumablesservice.consumables_service.infrastructure.enums.UserRole;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.repository.ConsumablesRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,22 +27,24 @@ public class ConsumablesService {
     private final ComsumablesConverter consumablesConverter;
     private final ConsumablesUpdateConverter consumablesUpdateConverter;
 
-    private UserDTO getCurrentUser(String token) {
+    private AuthenticatedUserDTO userAuthenticated(String token) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null) {
-            throw new ConflictExcpetion("Usuário não autenticado");
-        }
-
         String username = auth.getName();
 
-        return userClient.findUserByUsername(token, username);
+        UserDTO userDTO = userClient.findUserByUsername(token, username);
+
+        if (userDTO != null && userDTO.getUsername() != null) {
+            return new AuthenticatedUserDTO(userDTO.getUsername(), userDTO.getRole());
+        }
+
+        throw new ConflictExcpetion("Usuário(a) não encontrado(a) " + username);
     }
 
     public ConsumablesDTO addConsumable(String token, ConsumablesDTO consumablesDTO) {
-        UserDTO userDTO = getCurrentUser(token);
 
-        consumablesDTO.setCreatedby(userDTO.getUsername());
+        AuthenticatedUserDTO user = userAuthenticated(token);
+
+        consumablesDTO.setCreatedby(user.getUsername());
 
         Consumables consumables = consumablesConverter.comsumablesEntity(consumablesDTO);
 
@@ -53,14 +57,17 @@ public class ConsumablesService {
     }
 
     public ConsumablesDTO removeConsumable(String token, String id) {
-        UserDTO userDTO = getCurrentUser(token);
 
-        if (!userDTO.getRole().equals(1)) {
+        AuthenticatedUserDTO user = userAuthenticated(token);
+
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
+
+        if (!permitted) {
             throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir consumíveis.");
         }
 
         Consumables consumableDelete = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Consumivel não encontrado")
+                () -> new ConflictExcpetion("Consumível não encontrado")
         );
 
         consumablesRepository.delete(consumableDelete);
@@ -70,9 +77,11 @@ public class ConsumablesService {
 
     public ConsumablesDTO editConsumable(String token, String id, ConsumablesDTO consumablesDTO) {
 
-        UserDTO userDTO = getCurrentUser(token);
+        AuthenticatedUserDTO user = userAuthenticated(token);
 
-        if (!userDTO.getRole().equals(1)) {
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+
+        if (!permitted) {
             throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
         }
 
@@ -87,9 +96,11 @@ public class ConsumablesService {
 
     public ConsumablesDTO editQuantityConsumable(String token, String id, ConsumablesQuantityDTO consumablesQuantityDTO) {
 
-        UserDTO userDTO = getCurrentUser(token);
+        AuthenticatedUserDTO user = userAuthenticated(token);
 
-        if (!userDTO.getRole().equals(1)) {
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+
+        if (!permitted) {
             throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
         }
 
