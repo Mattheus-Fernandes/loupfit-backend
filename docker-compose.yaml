@@ -21,10 +21,9 @@ services:
 
   # User service
   user-service:
-    build: ./user-service
-    container_name: user-service
+    image: mattfernandes/user-service:1.1
     ports:
-      - "${USER_SERVICE_PORT}:8080"
+      - "${USER_SERVICE_PORT}:8089"
     depends_on:
       - userdb-postgres
     environment:
@@ -47,8 +46,7 @@ services:
 
   # Asset service
   asset-service:
-    build: ./asset-service
-    container_name: asset-service
+    image: mattfernandes/asset-service:1.1
     ports:
       - "${ASSET_SERVICE_PORT}:8081"
     depends_on:
@@ -71,8 +69,7 @@ services:
 
   # Consumables service
   consumables-service:
-      build: ./consumables-service
-      container_name: consumables-service
+      image: mattfernandes/consumables-service:1.1
       ports:
         - "${CONSUMABLES_SERVICE_PORT}:8082"
       depends_on:
