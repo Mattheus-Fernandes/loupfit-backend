@@ -37,9 +37,17 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/user/login").permitAll()
+                        .requestMatchers("/login").permitAll()
+                        //User
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
-                        .requestMatchers("/user/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/user").hasAnyRole("OWNER", "ADMIN", "VIEWER")
+                        .requestMatchers(HttpMethod.PUT, "/user/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/user/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/user/**").hasRole("OWNER")
+
+                        //Customer
+                        .requestMatchers(HttpMethod.POST, "/customer").permitAll()
+                        .requestMatchers("/customer/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

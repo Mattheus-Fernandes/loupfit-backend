@@ -1,17 +1,13 @@
 package com.loupfituserservice.userservice.business.dto;
 
 import lombok.*;
-
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Getter
-@Setter
-public class UserEditDTO {
+public class LoginDTO {
 
-    private String name;
-    private String lastname;
     private String username;
     private String password;
-    private Long role;
 }

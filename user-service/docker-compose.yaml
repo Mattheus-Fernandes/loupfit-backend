@@ -2,6 +2,7 @@ version: "3.8"
 services:
   postgres:
     image: postgres:16
+    container_name: database
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -11,17 +12,14 @@ services:
       - "5433:5432"
 
   user-service:
+    image: mattfernandes/user-service:1.1
     build: .
     container_name: user-service
     ports:
-      - "8080:8080"
+      - "8089:8089"
     depends_on:
       - postgres
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-networks:
-  default:
-    external: true
-    name: loupfit-network`

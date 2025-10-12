@@ -1,5 +1,6 @@
 package com.loupfituserservice.userservice.infrastructure.entity;
 
+import com.loupfituserservice.userservice.infrastructure.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,8 +34,9 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "role", nullable = false, length = 1)
-    private Long role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

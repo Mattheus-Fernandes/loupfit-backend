@@ -10,5 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface UserClient {
 
     @GetMapping("/user/search")
-    UserDTO findUserByUsername(@RequestHeader("Authorization") String token, @RequestParam("username") String username);
+    UserDTO getUserByUsername(@RequestHeader("Authorization") String token, @RequestParam("username") String username);
+
 }

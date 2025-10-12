@@ -1,11 +1,13 @@
 package com.loupfitassetservice.asset_service.business;
 
 import com.loupfitassetservice.asset_service.business.dto.AssetDTO;
+import com.loupfitassetservice.asset_service.business.dto.AuthenticatedUserDTO;
 import com.loupfitassetservice.asset_service.business.dto.UserDTO;
 import com.loupfitassetservice.asset_service.business.mapper.AssetConverter;
 import com.loupfitassetservice.asset_service.business.mapper.AssetUpdateConverter;
 import com.loupfitassetservice.asset_service.infrastructure.client.UserClient;
 import com.loupfitassetservice.asset_service.infrastructure.entity.Asset;
+import com.loupfitassetservice.asset_service.infrastructure.enums.UserRole;
 import com.loupfitassetservice.asset_service.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfitassetservice.asset_service.infrastructure.repository.AssetRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,25 +26,28 @@ public class AssetService {
     private final UserClient userClient;
     private final AssetUpdateConverter assetUpdateConverter;
 
-    private UserDTO getCurrentUser(String token) {
+    private AuthenticatedUserDTO userAuthenticated(String token) {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null) {
-            throw new ConflictExcpetion("Usuário não autenticado");
-        }
-
         String username = auth.getName();
 
-        return userClient.findUserByUsername(token, username);
+        UserDTO userDTO = userClient.getUserByUsername(token, username);
+
+        if (userDTO != null && userDTO.getUsername() != null) {
+            return new AuthenticatedUserDTO(userDTO.getUsername(), userDTO.getRole());
+        }
+
+        throw new ConflictExcpetion("Usuário(a) não encontrado(a) " + username);
 
     }
 
     public AssetDTO addAsset(String token, AssetDTO assetDTO) {
-        UserDTO userDTO = getCurrentUser(token);
+
+        AuthenticatedUserDTO user = userAuthenticated(token);
 
         existAsset(assetDTO.getAssetName());
 
-        assetDTO.setCreatedBy(userDTO.getUsername());
+        assetDTO.setCreatedBy(user.getUsername());
 
         Asset assetEntity = assetConverter.assetEntity(assetDTO);
 
@@ -64,7 +69,7 @@ public class AssetService {
     }
 
     public List<AssetDTO> filterAllAssets() {
-       return assetConverter.assetDTOList(assetRepository.findAll());
+        return assetConverter.assetDTOList(assetRepository.findAll());
     }
 
     public List<AssetDTO> assetAddedByCreatedBy(String username) {
@@ -73,9 +78,11 @@ public class AssetService {
 
     public AssetDTO removeAsset(String token, String id) {
 
-        UserDTO userDTO = getCurrentUser(token);
+        AuthenticatedUserDTO user = userAuthenticated(token);
 
-        if (!userDTO.getRole().equals(1)) {
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
+
+        if (!permitted) {
             throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir o equipamento.");
         }
 
@@ -91,9 +98,11 @@ public class AssetService {
 
     public AssetDTO editAsset(String token, String id, AssetDTO assetDTO) {
 
-        UserDTO userDTO = getCurrentUser(token);
+        AuthenticatedUserDTO user = userAuthenticated(token);
 
-        if (!userDTO.getRole().equals(1)) {
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+
+        if (!permitted) {
             throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar o equipamento.");
         }
 
@@ -107,5 +116,4 @@ public class AssetService {
 
 
     }
-
 }
