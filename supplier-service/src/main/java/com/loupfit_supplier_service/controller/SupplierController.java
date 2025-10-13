@@ -1,6 +1,7 @@
 package com.loupfit_supplier_service.controller;
 
 import com.loupfit_supplier_service.business.SupplierService;
+import com.loupfit_supplier_service.business.dto.SupplierActiveDTO;
 import com.loupfit_supplier_service.business.dto.SupplierDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -48,5 +49,14 @@ public class SupplierController {
             @RequestBody SupplierDTO dto
     ) {
         return ResponseEntity.ok(supplierService.updateSupplier(token, id, dto));
+    }
+
+    @PatchMapping("/{id}/active")
+    public ResponseEntity<SupplierDTO> editActiveSupplier(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String id,
+            @RequestBody SupplierActiveDTO dto
+    ) {
+        return ResponseEntity.ok(supplierService.updateActiveSupplier(token, id, dto));
     }
 }
