@@ -40,4 +40,13 @@ public class SupplierController {
     ) {
         return ResponseEntity.ok(supplierService.removeSupplier(token, id));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SupplierDTO> editSupplier(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String id,
+            @RequestBody SupplierDTO dto
+    ) {
+        return ResponseEntity.ok(supplierService.updateSupplier(token, id, dto));
+    }
 }

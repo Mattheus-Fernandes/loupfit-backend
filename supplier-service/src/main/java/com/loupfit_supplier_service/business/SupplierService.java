@@ -4,6 +4,7 @@ import com.loupfit_supplier_service.business.dto.AuthenticatedUser;
 import com.loupfit_supplier_service.business.dto.SupplierDTO;
 import com.loupfit_supplier_service.business.dto.UserDTO;
 import com.loupfit_supplier_service.business.mapper.SupplierConverter;
+import com.loupfit_supplier_service.business.mapper.SupplierUpdateConverter;
 import com.loupfit_supplier_service.infrastructure.client.UserClient;
 import com.loupfit_supplier_service.infrastructure.entity.Supplier;
 import com.loupfit_supplier_service.infrastructure.enums.UserRole;
@@ -22,6 +23,7 @@ public class SupplierService {
 
     private final SupplierRepository supplierRepository;
     private final SupplierConverter supplierConverter;
+    private final SupplierUpdateConverter supplierUpdateConverter;
     private final UserClient userClient;
 
 
@@ -105,6 +107,25 @@ public class SupplierService {
         supplierRepository.deleteById(id);
 
         return supplierConverter.supplierDTO(entity);
+    }
+
+    public SupplierDTO updateSupplier(String token, String id, SupplierDTO dto) {
+
+        AuthenticatedUser user = userAuthenticated(token);
+
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
+
+        if (!permitted) {
+            throw new ConflictException("OPSS! Você não tem PERMISSÃO para editar fornecedor.");
+        }
+
+        Supplier entityEdit = supplierRepository.findById(id).orElseThrow(
+                () -> new ConflictException("Fornecedor não encontrado")
+        );
+
+        supplierUpdateConverter.supplierUpdate(dto, entityEdit);
+
+        return supplierConverter.supplierDTO(supplierRepository.save(entityEdit));
     }
 
 }
