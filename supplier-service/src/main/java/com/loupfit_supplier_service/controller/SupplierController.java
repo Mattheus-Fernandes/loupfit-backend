@@ -32,4 +32,12 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.filterBySupplierName(name));
 
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SupplierDTO> deleteSupplier(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(supplierService.removeSupplier(token, id));
+    }
 }

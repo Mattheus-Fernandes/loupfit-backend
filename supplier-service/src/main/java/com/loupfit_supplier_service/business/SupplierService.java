@@ -6,6 +6,7 @@ import com.loupfit_supplier_service.business.dto.UserDTO;
 import com.loupfit_supplier_service.business.mapper.SupplierConverter;
 import com.loupfit_supplier_service.infrastructure.client.UserClient;
 import com.loupfit_supplier_service.infrastructure.entity.Supplier;
+import com.loupfit_supplier_service.infrastructure.enums.UserRole;
 import com.loupfit_supplier_service.infrastructure.exceptions.ConflictException;
 import com.loupfit_supplier_service.infrastructure.repository.SupplierRepository;
 import lombok.RequiredArgsConstructor;
@@ -85,6 +86,25 @@ public class SupplierService {
         } catch (ConflictException e) {
             throw new ConflictException(e.getMessage());
         }
+    }
+
+    public SupplierDTO removeSupplier(String token, String id) {
+
+        AuthenticatedUser user = userAuthenticated(token);
+
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
+
+        if (!permitted) {
+            throw new ConflictException("OPSS! Você não tem PERMISSÃO para excluir fornecedor.");
+        }
+
+        Supplier entity = supplierRepository.findById(id).orElseThrow(
+                () -> new ConflictException("Fornecedor não encontrado")
+        );
+
+        supplierRepository.deleteById(id);
+
+        return supplierConverter.supplierDTO(entity);
     }
 
 }
