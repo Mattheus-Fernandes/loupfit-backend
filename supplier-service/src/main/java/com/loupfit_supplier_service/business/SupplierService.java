@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SupplierService {
@@ -56,6 +58,30 @@ public class SupplierService {
                 throw new ConflictException("Fornecedor já cadastrado " + username);
             }
 
+        } catch (ConflictException e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+    public List<SupplierDTO> filterAllSupplies() {
+
+        try {
+
+            return supplierConverter.supplierDTOList(
+                    supplierRepository.findAll()
+            );
+        } catch (ConflictException e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+    public List<SupplierDTO> filterBySupplierName(String name) {
+
+        try {
+
+            return supplierConverter.supplierDTOList(
+                    supplierRepository.findBySupplierNameContainsIgnoreCase(name)
+            );
         } catch (ConflictException e) {
             throw new ConflictException(e.getMessage());
         }
