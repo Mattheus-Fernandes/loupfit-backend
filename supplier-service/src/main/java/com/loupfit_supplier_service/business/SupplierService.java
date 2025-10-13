@@ -1,0 +1,64 @@
+package com.loupfit_supplier_service.business;
+
+import com.loupfit_supplier_service.business.dto.AuthenticatedUser;
+import com.loupfit_supplier_service.business.dto.SupplierDTO;
+import com.loupfit_supplier_service.business.dto.UserDTO;
+import com.loupfit_supplier_service.business.mapper.SupplierConverter;
+import com.loupfit_supplier_service.infrastructure.client.UserClient;
+import com.loupfit_supplier_service.infrastructure.entity.Supplier;
+import com.loupfit_supplier_service.infrastructure.exceptions.ConflictException;
+import com.loupfit_supplier_service.infrastructure.repository.SupplierRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class SupplierService {
+
+    private final SupplierRepository supplierRepository;
+    private final SupplierConverter supplierConverter;
+    private final UserClient userClient;
+
+
+    private AuthenticatedUser userAuthenticated(String token) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        UserDTO userDTO = userClient.getUserByUsername(token, username);
+
+        if (userDTO != null && userDTO.getUsername() != null) {
+            return new AuthenticatedUser(userDTO.getUsername(), userDTO.getRole());
+        }
+
+        throw new ConflictException("Usuário(a) não encontrado(a) " + username);
+    }
+
+    public SupplierDTO addSupplier(SupplierDTO dto) {
+
+        existBySupplierName(dto.getSupplierName());
+
+        Supplier entity = supplierConverter.supplierEntity(dto);
+
+        return supplierConverter.supplierDTO(supplierRepository.save(entity));
+
+    }
+
+    public void existBySupplierName(String username) {
+
+        try {
+
+            boolean exist = supplierRepository.existsBySupplierName(username);
+
+            if (exist) {
+                throw new ConflictException("Fornecedor já cadastrado " + username);
+            }
+
+        } catch (ConflictException e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+}
