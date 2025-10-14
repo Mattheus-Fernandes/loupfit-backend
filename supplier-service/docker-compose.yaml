@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27020:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ${URI_MONGO_DB}
+
+  supplier-service:
+    build: .
+    container_name: supplier-service
+    restart: always
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/${URI_MONGO_DB}
