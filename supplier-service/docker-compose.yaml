@@ -11,8 +11,7 @@ services:
       MONGO_INITDB_DATABASE: ${URI_MONGO_DB}
 
   supplier-service:
-    build: .
-    container_name: supplier-service
+    image: mattfernandes/supplier-service:1.0
     restart: always
     ports:
       - "${PORT}:${PORT}"
