@@ -78,3 +78,27 @@ services:
         SPRING_DATA_MONGODB_URI: mongodb://consumablesdb-mongodb:27017/${MONGO_DB_CONSUMABLES}
       networks:
         - loupfit-network
+
+  # Consumables service DB
+  supplierdb-mongodb:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_SUPPLIER}
+    ports:
+      - "27020:27017"
+    networks:
+      - loupfit-network
+
+  # Supplier service
+  supplier-service:
+    image: mattfernandes/supplier-service:1.0
+    ports:
+      - "${SUPPLIER_SERVICE_PORT}:${SUPPLIER_SERVICE_PORT}"
+    depends_on:
+      - supplierdb-mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://supplierdb-mongodb:27017/${MONGO_DB_CONSUMABLES}
+    networks:
+      - loupfit-network
+
