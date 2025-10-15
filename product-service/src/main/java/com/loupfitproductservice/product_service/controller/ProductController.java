@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/products")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -22,4 +24,32 @@ public class ProductController {
     ) {
         return ResponseEntity.ok(productService.addProduct(token, dto, file));
     }
+
+    @GetMapping
+    public ResponseEntity<List<ProductDTO>> findProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String createdBy
+
+    ) {
+
+        if (name != null || category != null || size != null || createdBy != null) {
+            return ResponseEntity.ok(productService.filterProduct(name, category, size, createdBy));
+        }
+
+        return ResponseEntity.ok(productService.filterAllProduct());
+    }
+
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<ProductDTO>> findProductsLowStock() {
+        return ResponseEntity.ok(productService.filterProductLowStock());
+    }
+
+    @GetMapping("/best-sellers")
+    public ResponseEntity<List<ProductDTO>> findProductsBestSellers() {
+        return ResponseEntity.ok(productService.filterProductBestSellers());
+    }
+
+
 }

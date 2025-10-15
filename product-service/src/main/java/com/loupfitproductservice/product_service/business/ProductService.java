@@ -8,10 +8,14 @@ import com.loupfitproductservice.product_service.infrastructure.entity.Product;
 import com.loupfitproductservice.product_service.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfitproductservice.product_service.infrastructure.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.config.ConfigDataException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -65,4 +69,72 @@ public class ProductService {
         }
     }
 
+    public List<ProductDTO> filterAllProduct() {
+        try {
+
+            return productConverter.productsDTOList(
+                    productRepository.findAll()
+            );
+        } catch (ConflictExcpetion e) {
+            throw new ConflictExcpetion(e.getMessage());
+        }
+    }
+
+    public List<ProductDTO> filterProduct(String name, String category, String size, String createdBy) {
+
+        try {
+
+            List<Product> products = new ArrayList<Product>();
+
+            if (name != null && !name.isEmpty()) {
+                products = productRepository.findByNameContainsIgnoreCase(name);
+            } else if (category != null && !category.isEmpty()) {
+                products = productRepository.findByCategoryContainsIgnoreCase(category);
+            } else if (size != null && !size.isEmpty()) {
+                products = productRepository.findBySizeContainsIgnoreCase(size);
+            } else if (createdBy != null && !createdBy.isEmpty()) {
+                products = productRepository.findByCreatedByIgnoreCase(createdBy);
+            }
+
+            if (products.isEmpty()) {
+                throw new ConflictExcpetion("Nenhum produto encontrado");
+            }
+
+            return productConverter.productsDTOList(products);
+
+        } catch (ConfigDataException e) {
+            throw new ConflictExcpetion(e.getMessage());
+
+        }
+    }
+
+    public List<ProductDTO> filterProductLowStock() {
+
+        try {
+            List<Product> products = productRepository.findByStockLessThan(4);
+
+            if (products.isEmpty()) {
+                throw new ConflictExcpetion("Nenhum produto com baixo estoque encontrado.");
+            }
+
+            return productConverter.productsDTOList(products);
+        } catch (ConflictExcpetion e) {
+            throw new ConflictExcpetion(e.getMessage());
+        }
+    }
+
+    public List<ProductDTO> filterProductBestSellers() {
+
+        try {
+            List<Product> products = productRepository.findBySalesGreaterThan(10);
+
+            if (products.isEmpty()) {
+                throw new ConflictExcpetion("Nenhum produto encontrado.");
+            }
+
+            return productConverter.productsDTOList(products);
+        } catch (ConflictExcpetion e) {
+            throw new ConflictExcpetion(e.getMessage());
+        }
+    }
 }
