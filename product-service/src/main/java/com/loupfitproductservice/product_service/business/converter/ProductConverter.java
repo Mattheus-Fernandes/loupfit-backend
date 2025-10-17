@@ -1,6 +1,6 @@
 package com.loupfitproductservice.product_service.business.converter;
 
-import com.loupfitproductservice.product_service.business.dto.ProductDTO;
+import com.loupfitproductservice.product_service.business.dto.product.ProductDTO;
 import com.loupfitproductservice.product_service.infrastructure.entity.Product;
 import org.mapstruct.Mapper;
 

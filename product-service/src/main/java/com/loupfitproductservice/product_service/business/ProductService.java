@@ -1,10 +1,15 @@
 package com.loupfitproductservice.product_service.business;
 
 import com.loupfitproductservice.product_service.business.converter.ProductConverter;
-import com.loupfitproductservice.product_service.business.dto.ProductDTO;
+import com.loupfitproductservice.product_service.business.converter.ProductUpdateConverter;
+import com.loupfitproductservice.product_service.business.dto.product.ProductDTO;
 import com.loupfitproductservice.product_service.business.dto.UserDTO;
+import com.loupfitproductservice.product_service.business.dto.product.ProductUpdateJsonDTO;
+import com.loupfitproductservice.product_service.business.dto.product.ProductUpdatePriceDTO;
+import com.loupfitproductservice.product_service.business.dto.product.ProductUpdateStockSalesDTO;
 import com.loupfitproductservice.product_service.infrastructure.client.UserClient;
 import com.loupfitproductservice.product_service.infrastructure.entity.Product;
+import com.loupfitproductservice.product_service.infrastructure.enums.UserRole;
 import com.loupfitproductservice.product_service.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfitproductservice.product_service.infrastructure.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +29,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductConverter productConverter;
+    private final ProductUpdateConverter productUpdateConverter;
     private final MinioService minioService;
     private final UserClient userClient;
 
@@ -136,5 +143,146 @@ public class ProductService {
         } catch (ConflictExcpetion e) {
             throw new ConflictExcpetion(e.getMessage());
         }
+    }
+
+    public ProductDTO updateProduct(String token, Long id, ProductUpdateJsonDTO dto) {
+
+        UserDTO user = authenticatedUser(token);
+
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+
+        if (!permitted) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar produto.");
+        }
+
+        Product entity = productRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Produto não encontrado")
+        );
+
+        productUpdateConverter.productUpdateJson(dto, entity);
+
+        return productConverter.productDTO(productRepository.save(entity));
+    }
+
+    public ProductDTO updateStockAndSalesProduct(String token, Long id, ProductUpdateStockSalesDTO dto) {
+
+        UserDTO user = authenticatedUser(token);
+
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+
+        if (!permitted) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar produto.");
+        }
+
+        Product entity = productRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Produto não encontrado")
+        );
+
+        String operation = dto.getOperation().toUpperCase();
+
+        if ("STOCK".equalsIgnoreCase(dto.getInventory())) {
+
+            switch (operation) {
+
+                case "DECREASE":
+
+                    if (entity.getStock() < dto.getQuantity()) {
+                        throw new ConflictExcpetion("Estoque insuficiente para realizar a operação");
+                    }
+
+
+                    entity.setStock(entity.getStock() - dto.getQuantity());
+
+                    break;
+
+                case "INCREASE":
+
+                    entity.setStock(entity.getStock() + dto.getQuantity());
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        if ("SALES".equalsIgnoreCase(dto.getInventory())) {
+
+            switch (operation) {
+
+                case "DECREASE":
+
+                    if (entity.getSales() < dto.getQuantity()) {
+                        throw new ConflictExcpetion("Não é possível remover mais vendas do que registradas");
+                    }
+
+                    entity.setSales(entity.getSales() - dto.getQuantity());
+
+                    break;
+
+                case "INCREASE":
+
+                    entity.setSales(entity.getSales() + dto.getQuantity());
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return productConverter.productDTO(productRepository.save(entity));
+    }
+
+    public ProductDTO updatePriceProduct(String token, Long id, ProductUpdatePriceDTO price) {
+
+        UserDTO user = authenticatedUser(token);
+
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+
+        if (!permitted) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar produto.");
+        }
+
+        Product entity = productRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Produto não encontrado")
+        );
+
+        productUpdateConverter.productUpdatePrice(price, entity);
+
+        return productConverter.productDTO(productRepository.save(entity));
+
+    }
+
+    public ProductDTO updateImageProduct(String token, Long id, MultipartFile file) {
+
+        UserDTO user = authenticatedUser(token);
+
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+
+        if (!permitted) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar produto.");
+        }
+
+        Product entity = productRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Produto não encontrado")
+        );
+
+        // Remove Image from MinIO
+        if (entity.getImageUrl() != null && !entity.getImageUrl().isEmpty()) {
+            String fileName = extractFileName(entity.getImageUrl());
+            minioService.removeFile(fileName);
+        }
+
+        // Update New Image
+        String newImage = minioService.uploadFile(file);
+        entity.setImageUrl(newImage);
+
+        return productConverter.productDTO(productRepository.save(entity));
+
+    }
+
+    private String extractFileName(String imageUrl) {
+        return imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
     }
 }

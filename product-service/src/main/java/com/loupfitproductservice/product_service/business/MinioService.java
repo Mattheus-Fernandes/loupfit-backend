@@ -2,6 +2,7 @@ package com.loupfitproductservice.product_service.business;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,5 +37,24 @@ public class MinioService {
         } catch (Exception e) {
             throw new RuntimeException("Erro ao fazer upload no MinIO: " + e.getMessage());
         }
+    }
+
+    public String removeFile(String fileName) {
+
+        try {
+
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fileName)
+                            .build()
+            );
+
+            return "Imagem removida com sucesso";
+
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao remover arquivo do MinIO: " + e.getMessage(), e);
+        }
+
     }
 }

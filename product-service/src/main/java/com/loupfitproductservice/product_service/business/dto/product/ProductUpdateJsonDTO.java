@@ -1,6 +1,7 @@
-package com.loupfitproductservice.product_service.business.dto;
+package com.loupfitproductservice.product_service.business.dto.product;
 
 import lombok.*;
+
 import java.math.BigDecimal;
 
 @AllArgsConstructor
@@ -8,12 +9,11 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Builder
-public class ProductDTO {
+public class ProductUpdateJsonDTO {
 
     private Long id;
     private String name;
     private String description;
-    private String imageUrl;
     private BigDecimal price;
     private BigDecimal costPrice;
     private Integer stock;
@@ -22,6 +22,7 @@ public class ProductDTO {
     private String size;
     private String color;
     private String material;
-    private Integer sales = 0;
+    private Integer sales;
     private String createdBy;
 }
+
