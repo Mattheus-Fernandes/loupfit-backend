@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -61,7 +59,7 @@ public class ProductController {
             @PathVariable Long id,
             @RequestBody ProductUpdateJsonDTO dto
     ) {
-        return  ResponseEntity.ok(productService.updateProduct(token, id, dto));
+        return ResponseEntity.ok(productService.updateProduct(token, id, dto));
     }
 
     @PatchMapping("/{id}/inventory")
@@ -70,7 +68,7 @@ public class ProductController {
             @PathVariable Long id,
             @RequestBody ProductUpdateStockSalesDTO dto
     ) {
-        return  ResponseEntity.ok(productService.updateStockAndSalesProduct(token, id, dto));
+        return ResponseEntity.ok(productService.updateStockAndSalesProduct(token, id, dto));
     }
 
     @PatchMapping("/{id}/price")
@@ -79,7 +77,7 @@ public class ProductController {
             @PathVariable Long id,
             @RequestBody ProductUpdatePriceDTO price
     ) {
-        return  ResponseEntity.ok(productService.updatePriceProduct(token, id, price));
+        return ResponseEntity.ok(productService.updatePriceProduct(token, id, price));
     }
 
     @PatchMapping("/{id}/image")
@@ -88,7 +86,15 @@ public class ProductController {
             @PathVariable Long id,
             @RequestPart("file") MultipartFile file
     ) {
-        return  ResponseEntity.ok(productService.updateImageProduct(token, id, file));
+        return ResponseEntity.ok(productService.updateImageProduct(token, id, file));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ProductDTO> deleteProduct(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(productService.removeProduct(token, id));
     }
 
 }

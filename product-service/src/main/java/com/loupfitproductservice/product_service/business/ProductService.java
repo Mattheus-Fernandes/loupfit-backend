@@ -285,4 +285,29 @@ public class ProductService {
     private String extractFileName(String imageUrl) {
         return imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
     }
+
+    public ProductDTO removeProduct(String token, Long id) {
+        UserDTO user = authenticatedUser(token);
+
+        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
+
+        if (!permitted) {
+            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir produto.");
+        }
+
+        Product entity = productRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Produto não encontrado")
+        );
+
+        // First remove from MIniO
+        if (entity.getImageUrl() != null && !entity.getImageUrl().isEmpty()) {
+            String fileName = extractFileName(entity.getImageUrl());
+            minioService.removeFile(fileName);
+        }
+
+        // Second remove from DB
+        productRepository.deleteById(id);
+
+        return productConverter.productDTO(entity);
+    }
 }
