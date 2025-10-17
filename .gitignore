@@ -2,3 +2,5 @@
 .env
 
 .idea/compiler.xml
+
+minio_data/

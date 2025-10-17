@@ -78,3 +78,76 @@ services:
         SPRING_DATA_MONGODB_URI: mongodb://consumablesdb-mongodb:27017/${MONGO_DB_CONSUMABLES}
       networks:
         - loupfit-network
+
+  # Consumables service DB
+  supplierdb-mongodb:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_SUPPLIER}
+    ports:
+      - "27020:27017"
+    networks:
+      - loupfit-network
+
+  # Supplier service
+  supplier-service:
+    image: mattfernandes/supplier-service:1.0
+    ports:
+      - "${SUPPLIER_SERVICE_PORT}:${SUPPLIER_SERVICE_PORT}"
+    depends_on:
+      - supplierdb-mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://supplierdb-mongodb:27017/${MONGO_DB_CONSUMABLES}
+    networks:
+      - loupfit-network
+
+  # Product service DB
+  productdb-postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_PRODUCT}
+      POSTGRES_USER: ${POSTGRES_USER_PRODUCT}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PRODUCT}
+
+    ports:
+      - "5434:5432"
+    networks:
+      - loupfit-network
+
+  # Product service
+  product-service:
+    image: mattfernandes/product-service:1.0
+    ports:
+      - "${PRODUCT_SERVICE_PORT}:8084"
+    depends_on:
+      - productdb-postgres
+      - minio
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://productdb-postgres:5432/${POSTGRES_DB_PRODUCT}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER_PRODUCT}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD_PRODUCT}
+
+      MINIO_ACCESS_NAME: ${ROOT_USER}
+      MINIO_ACCESS_SECRET: ${ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${BUCKET_NAME}
+    networks:
+      - loupfit-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./minio_data:/data
+    networks:
+      - loupfit-network
+

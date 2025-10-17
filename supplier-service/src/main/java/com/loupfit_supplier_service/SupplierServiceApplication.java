@@ -1,4 +1,4 @@
-package com.loupfitproductservice.product_service;
+package com.loupfit_supplier_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class ProductServiceApplication {
+public class SupplierServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ProductServiceApplication.class, args);
+		SpringApplication.run(SupplierServiceApplication.class, args);
 	}
 
 }
