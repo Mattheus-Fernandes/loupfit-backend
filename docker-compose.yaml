@@ -102,6 +102,39 @@ services:
     networks:
       - loupfit-network
 
+  # Product service DB
+  productdb-postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_PRODUCT}
+      POSTGRES_USER: ${POSTGRES_USER_PRODUCT}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PRODUCT}
+
+    ports:
+      - "5434:5432"
+    networks:
+      - loupfit-network
+
+  # Product service
+  product-service:
+    image: mattfernandes/product-service:1.0
+    ports:
+      - "${PRODUCT_SERVICE_PORT}:8084"
+    depends_on:
+      - productdb-postgres
+      - minio
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://productdb-postgres:5432/${POSTGRES_DB_PRODUCT}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER_PRODUCT}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD_PRODUCT}
+
+      MINIO_ACCESS_NAME: ${ROOT_USER}
+      MINIO_ACCESS_SECRET: ${ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${BUCKET_NAME}
+    networks:
+      - loupfit-network
+
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -115,4 +148,6 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - ./minio_data:/data
+    networks:
+      - loupfit-network
 
