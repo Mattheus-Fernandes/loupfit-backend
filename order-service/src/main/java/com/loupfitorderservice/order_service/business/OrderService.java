@@ -71,6 +71,7 @@ public class OrderService {
         dto.setOrderId("#" + UUID.randomUUID().toString());
         dto.setProductId(product.getId());
         dto.setProductName(product.getName());
+        dto.setImageUrl(product.getImageUrl());
         dto.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
         dto.setColor(product.getColor());
         dto.setSize(product.getSize());
