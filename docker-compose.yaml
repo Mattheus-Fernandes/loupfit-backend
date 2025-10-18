@@ -118,7 +118,7 @@ services:
 
   # Product service
   product-service:
-    image: mattfernandes/product-service:1.0
+    image: mattfernandes/product-service:1.1
     ports:
       - "${PRODUCT_SERVICE_PORT}:8084"
     depends_on:
