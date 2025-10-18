@@ -151,3 +151,26 @@ services:
     networks:
       - loupfit-network
 
+  # Order service DB
+  orderdb-mongodb:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_ORDER}
+    ports:
+      - "27021:27017"
+    networks:
+      - loupfit-network
+
+  # Order service
+  order-service:
+    image: mattfernandes/order-service:1.0
+    ports:
+      - "${ORDER_SERVICE_PORT}:${ORDER_SERVICE_PORT}"
+    depends_on:
+      - supplierdb-mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://orderdb-mongodb:27017/${MONGO_DB_ORDER}
+    networks:
+      - loupfit-network
+
