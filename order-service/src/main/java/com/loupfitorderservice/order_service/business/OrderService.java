@@ -91,4 +91,15 @@ public class OrderService {
             throw new ConflictExcpetion(e.getMessage());
         }
     }
+
+    public OrderDTO removeSale(String id) {
+
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Registro de venda não encontrada")
+        );
+
+        orderRepository.deleteById(id);
+
+        return orderConverter.orderDTO(order);
+    }
 }

@@ -27,4 +27,11 @@ public class OrderController {
     public ResponseEntity<List<OrderDTO>> findAllSales() {
         return ResponseEntity.ok(orderService.filterAllSales());
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<OrderDTO> deleteSale(
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(orderService.removeSale(id));
+    }
 }
