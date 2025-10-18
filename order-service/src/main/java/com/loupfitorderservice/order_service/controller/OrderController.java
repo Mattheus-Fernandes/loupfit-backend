@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/order")
 @RequiredArgsConstructor
@@ -19,5 +21,17 @@ public class OrderController {
             @RequestBody OrderDTO dto
     ) {
         return ResponseEntity.ok(orderService.processSale(token, dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderDTO>> findAllSales() {
+        return ResponseEntity.ok(orderService.filterAllSales());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<OrderDTO> deleteSale(
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(orderService.removeSale(id));
     }
 }

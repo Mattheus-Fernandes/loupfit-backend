@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -78,5 +79,27 @@ public class OrderService {
 
         return orderConverter.orderDTO(orderRepository.save(newOrder));
 
+    }
+
+    public List<OrderDTO> filterAllSales() {
+
+        try {
+            return orderConverter.ordersListDTO(
+                    orderRepository.findAll()
+            );
+        } catch (ConflictExcpetion e) {
+            throw new ConflictExcpetion(e.getMessage());
+        }
+    }
+
+    public OrderDTO removeSale(String id) {
+
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new ConflictExcpetion("Registro de venda não encontrada")
+        );
+
+        orderRepository.deleteById(id);
+
+        return orderConverter.orderDTO(order);
     }
 }
