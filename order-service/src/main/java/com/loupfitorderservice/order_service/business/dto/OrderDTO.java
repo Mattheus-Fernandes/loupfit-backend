@@ -2,6 +2,8 @@ package com.loupfitorderservice.order_service.business.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -9,9 +11,14 @@ import lombok.*;
 @Builder
 public class OrderDTO {
 
+    private String id;
+    private String orderId;
+    private Long productId;
     private String productName;
     private Integer quantity;
-    private String operation;
-    private String inventory;
+    private BigDecimal totalPrice;
+    private String size;
+    private String color;
+    private String soldBy;
     private String paymentMethod;
 }
