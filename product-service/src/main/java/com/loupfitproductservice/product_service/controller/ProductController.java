@@ -43,6 +43,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.filterAllProduct());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDTO> findProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.filterProductById(id));
+    }
+
     @GetMapping("/low-stock")
     public ResponseEntity<List<ProductDTO>> findProductsLowStock() {
         return ResponseEntity.ok(productService.filterProductLowStock());
