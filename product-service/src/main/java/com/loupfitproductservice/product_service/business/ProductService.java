@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +83,21 @@ public class ProductService {
             );
         } catch (ConflictExcpetion e) {
             throw new ConflictExcpetion(e.getMessage());
+        }
+    }
+
+    public ProductDTO filterProductById(Long id) {
+        try {
+
+            return productConverter.productDTO(
+                    productRepository.findById(id).orElseThrow(
+                            () -> new ConflictExcpetion("Nenhum produto encontrado")
+                    )
+            );
+
+        } catch (ConfigDataException e) {
+            throw new ConflictExcpetion(e.getMessage());
+
         }
     }
 
