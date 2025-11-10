@@ -1,15 +1,9 @@
-package com.loupfituserservice.userservice.business;
+package com.loupfit.bffservice.business;
 
-import com.loupfituserservice.userservice.business.converter.CustomerConverter;
-import com.loupfituserservice.userservice.business.dto.customer.CustomerDTO;
-import com.loupfituserservice.userservice.business.dto.customer.CustomerReqDTO;
-import com.loupfituserservice.userservice.infrastructure.entity.Customer;
-import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictExcpetion;
-import com.loupfituserservice.userservice.infrastructure.repository.CustomerRepository;
+import com.loupfit.bffservice.business.dto.out.CustomerDTO;
+import com.loupfit.bffservice.business.dto.in.CustomerReqDTO;
+import com.loupfit.bffservice.infrastructure.client.CustomerClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,80 +13,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerService {
 
-    private final CustomerRepository customerRepository;
-    private final CustomerConverter customerConverter;
-    private final PasswordEncoder passwordEncoder;
+    private final CustomerClient customerClient;
 
     public CustomerDTO addCustomer(@RequestBody CustomerReqDTO dto) {
-        validateCustomer(dto);
-
-        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        Customer entity = customerConverter.createCustomer(dto);
-
-        return customerConverter.customerDTO(customerRepository.save(entity));
+        return customerClient.saveCustomer(dto);
 
     }
 
-    public void validateCustomer(CustomerReqDTO dto) {
-
-        if (customerRepository.existsByUsername(dto.getUsername())) {
-            throw new ConflictExcpetion("Usuário(a) já em uso " + dto.getUsername());
-        }
-
-        if (customerRepository.existsByEmail(dto.getEmail())) {
-            throw new ConflictExcpetion("E-mail já em uso  " + dto.getEmail());
-        }
-
-        if (customerRepository.existsByCpf(dto.getCpf())) {
-            throw new ConflictExcpetion("CPF já cadastrado  " + dto.getCpf());
-        }
-
+    public List<CustomerDTO> filterAllCustomers(String token) {
+        return customerClient.findAllCustomers(token);
     }
 
-    public List<CustomerDTO> filterAllCustomers() {
-        return customerConverter.customerDTOList(customerRepository.findAll());
+    public CustomerDTO filterCurrentUser(String token) {
+       return customerClient.findByCurrentUser(token);
     }
 
-    public CustomerDTO filterCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-
-        Customer entity = customerRepository.findByUsername(username).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado " + username)
-        );
-
-        return customerConverter.customerDTO(entity);
+    public CustomerDTO editCustomer(String token, CustomerReqDTO dto) {
+        return customerClient.updateCustomer(token, dto);
     }
 
-    public CustomerDTO editCustomer(CustomerReqDTO dto) {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-
-        Customer entity = customerRepository.findByUsername(username).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado " + username)
-        );
-
-        Customer entityEdit = customerConverter.updateCustomer(dto, entity);
-
-        if (dto.getPassword() != null) {
-            entityEdit.setPassword(passwordEncoder.encode(dto.getPassword()));
-        } else {
-            entityEdit.setPassword(entity.getPassword());
-        }
-
-        return customerConverter.customerDTO(customerRepository.save(entityEdit));
-
-    }
-
-    public CustomerDTO removeCustomer(Long id) {
-        Customer entity = customerRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado")
-        );
-
-        customerRepository.deleteById(id);
-
-        return customerConverter.customerDTO(entity);
+    public CustomerDTO removeCustomer(String token, Long id) {
+        return customerClient.deleteCustomer(token, id);
     }
 }

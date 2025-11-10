@@ -1,6 +1,6 @@
-package com.loupfituserservice.userservice.business.dto.user;
+package com.loupfit.bffservice.business.dto.in;
 
-import com.loupfituserservice.userservice.infrastructure.enums.UserRole;
+import com.loupfit.bffservice.infrastructure.enums.UserRole;
 import lombok.*;
 
 @AllArgsConstructor

@@ -1,4 +1,4 @@
-package com.loupfituserservice.userservice.business.dto.customer;
+package com.loupfit.bffservice.business.dto.out;
 
 import lombok.*;
 
