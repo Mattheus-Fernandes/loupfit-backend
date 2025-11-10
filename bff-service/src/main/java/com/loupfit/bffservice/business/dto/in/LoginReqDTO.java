@@ -1,4 +1,4 @@
-package com.loupfit.bffservice.business.dto.user;
+package com.loupfit.bffservice.business.dto.in;
 
 import lombok.*;
 @Getter
@@ -6,7 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginDTO {
+public class LoginReqDTO {
 
     private String username;
     private String password;

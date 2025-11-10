@@ -1,6 +1,6 @@
-package com.loupfituserservice.userservice.business.dto.user;
+package com.loupfit.bffservice.business.dto.out;
 
-import com.loupfituserservice.userservice.infrastructure.enums.UserRole;
+import com.loupfit.bffservice.infrastructure.enums.UserRole;
 import lombok.*;
 
 @AllArgsConstructor
@@ -8,11 +8,11 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-public class UserReqDTO {
+public class UserDTO {
 
+    private Long id;
     private String name;
     private String lastname;
     private String username;
-    private String password;
     private UserRole role;
 }

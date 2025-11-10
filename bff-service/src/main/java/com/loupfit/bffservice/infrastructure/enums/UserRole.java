@@ -1,4 +1,4 @@
-package com.loupfituserservice.userservice.infrastructure.enums;
+package com.loupfit.bffservice.infrastructure.enums;
 
 public enum UserRole {
     OWNER,
