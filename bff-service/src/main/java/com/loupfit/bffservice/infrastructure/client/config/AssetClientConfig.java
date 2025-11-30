@@ -4,10 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class UserClientConfig {
+public class AssetClientConfig {
 
-    @Bean(name = "userErrorDecoder")
-    public UserErrorDecoder userErrorDecoder() {
-        return new UserErrorDecoder();
+    @Bean(name = "assetErrorDecoder")
+    public AssetErrorDecoder assetErrorDecoder() {
+        return new AssetErrorDecoder();
     }
 }

@@ -1,10 +1,11 @@
-package com.loupfitassetservice.asset_service.controller;
+package com.loupfit.bffservice.controller;
 
-import com.loupfitassetservice.asset_service.business.AssetService;
-import com.loupfitassetservice.asset_service.business.dto.AssetDTO;
+import com.loupfit.bffservice.business.AssetService;
+import com.loupfit.bffservice.business.dto.out.AssetDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -21,13 +22,13 @@ public class AssetController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AssetDTO>> findAllAssets() {
-        return ResponseEntity.ok(assetService.filterAllAssets());
+    public ResponseEntity<List<AssetDTO>> findAllAssets(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(assetService.filterAllAssets(token));
     }
 
     @GetMapping("/by-username")
-    public ResponseEntity<List<AssetDTO>> findAssetByUsername(@RequestParam String username) {
-        return ResponseEntity.ok(assetService.assetAddedByCreatedBy(username));
+    public ResponseEntity<List<AssetDTO>> findAssetByUsername(@RequestHeader("Authorization") String token, @RequestParam String username) {
+        return ResponseEntity.ok(assetService.assetAddedByCreatedBy(token, username));
     }
 
     @DeleteMapping("/{id}")

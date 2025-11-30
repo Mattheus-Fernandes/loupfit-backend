@@ -8,7 +8,9 @@ import com.loupfitassetservice.asset_service.business.mapper.AssetUpdateConverte
 import com.loupfitassetservice.asset_service.infrastructure.client.UserClient;
 import com.loupfitassetservice.asset_service.infrastructure.entity.Asset;
 import com.loupfitassetservice.asset_service.infrastructure.enums.UserRole;
-import com.loupfitassetservice.asset_service.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfitassetservice.asset_service.infrastructure.exceptions.ConflictException;
+import com.loupfitassetservice.asset_service.infrastructure.exceptions.ForbiddenException;
+import com.loupfitassetservice.asset_service.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfitassetservice.asset_service.infrastructure.repository.AssetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -37,7 +39,7 @@ public class AssetService {
             return new AuthenticatedUserDTO(userDTO.getUsername(), userDTO.getRole());
         }
 
-        throw new ConflictExcpetion("Usuário(a) não encontrado(a) " + username);
+        throw new ResourceNotFoundException("Usuário(a) não encontrado(a) " + username);
 
     }
 
@@ -60,11 +62,11 @@ public class AssetService {
             boolean exist = assetRepository.existsByAssetName(assetName);
 
             if (exist) {
-                throw new ConflictExcpetion("Equipamento já cadastrado " + assetName);
+                throw new ConflictException("Equipamento já cadastrado " + assetName);
             }
 
-        } catch (ConflictExcpetion e) {
-            throw new ConflictExcpetion(e.getMessage());
+        } catch (ConflictException e) {
+            throw new ConflictException(e.getMessage());
         }
     }
 
@@ -83,11 +85,11 @@ public class AssetService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir o equipamento.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para excluir o equipamento.");
         }
 
         Asset assetDelete = assetRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Equipamento não encontrado")
+                () -> new ResourceNotFoundException("Equipamento não encontrado")
         );
 
         assetRepository.delete(assetDelete);
@@ -103,17 +105,16 @@ public class AssetService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar o equipamento.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar o equipamento.");
         }
 
         Asset assetEdit = assetRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Equipamento não encontrado")
+                () -> new ResourceNotFoundException("Equipamento não encontrado")
         );
 
         assetUpdateConverter.assetUpdate(assetDTO, assetEdit);
 
         return assetConverter.assetDTO(assetRepository.save(assetEdit));
-
 
     }
 }
