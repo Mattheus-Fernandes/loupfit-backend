@@ -9,7 +9,7 @@ import com.loupfitconsumablesservice.consumables_service.business.mapper.Consuma
 import com.loupfitconsumablesservice.consumables_service.infrastructure.client.UserClient;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.entity.Consumables;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.enums.UserRole;
-import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ConflictException;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.repository.ConsumablesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -37,7 +37,7 @@ public class ConsumablesService {
             return new AuthenticatedUserDTO(userDTO.getUsername(), userDTO.getRole());
         }
 
-        throw new ConflictExcpetion("Usuário(a) não encontrado(a) " + username);
+        throw new ConflictException("Usuário(a) não encontrado(a) " + username);
     }
 
     public ConsumablesDTO addConsumable(String token, ConsumablesDTO consumablesDTO) {
@@ -63,11 +63,11 @@ public class ConsumablesService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir consumíveis.");
+            throw new ConflictException("OPSS! Você não tem PERMISSÃO para excluir consumíveis.");
         }
 
         Consumables consumableDelete = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Consumível não encontrado")
+                () -> new ConflictException("Consumível não encontrado")
         );
 
         consumablesRepository.delete(consumableDelete);
@@ -82,11 +82,11 @@ public class ConsumablesService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
+            throw new ConflictException("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
         }
 
         Consumables consumableEdit = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Consumível não encontrado")
+                () -> new ConflictException("Consumível não encontrado")
         );
 
         consumablesUpdateConverter.consumableUpdate(consumablesDTO, consumableEdit);
@@ -101,17 +101,17 @@ public class ConsumablesService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
+            throw new ConflictException("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
         }
 
         Consumables consumableQuantity = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Consumível não encontrado")
+                () -> new ConflictException("Consumível não encontrado")
         );
 
         if ("DECREASE".equalsIgnoreCase(consumablesQuantityDTO.getOperation())) {
 
             if (consumableQuantity.getQuantity() < consumablesQuantityDTO.getQuantity()) {
-                throw new ConflictExcpetion("Estoque insuficiente para realizar a operação");
+                throw new ConflictException("Estoque insuficiente para realizar a operação");
             }
 
             consumableQuantity.setQuantity(consumableQuantity.getQuantity() - consumablesQuantityDTO.getQuantity());
