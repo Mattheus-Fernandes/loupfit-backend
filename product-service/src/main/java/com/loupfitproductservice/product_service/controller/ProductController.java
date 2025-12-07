@@ -1,5 +1,6 @@
 package com.loupfitproductservice.product_service.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loupfitproductservice.product_service.business.ProductService;
 import com.loupfitproductservice.product_service.business.dto.product.ProductDTO;
 import com.loupfitproductservice.product_service.business.dto.product.ProductUpdateJsonDTO;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -18,13 +20,21 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<ProductDTO> saveProduct(
             @RequestHeader("Authorization") String token,
-            @RequestPart("product") ProductDTO dto,
+            @RequestPart("product") String productJson,
             @RequestPart("file") MultipartFile file
     ) {
-        return ResponseEntity.ok(productService.addProduct(token, dto, file));
+        try {
+
+            ProductDTO dto = new ObjectMapper().readValue(productJson, ProductDTO.class);
+
+            return ResponseEntity.ok(productService.addProduct(token, dto, file));
+
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao converter JSON", e);
+        }
     }
 
     @GetMapping
