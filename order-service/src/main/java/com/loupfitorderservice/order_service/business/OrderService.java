@@ -7,6 +7,7 @@ import com.loupfitorderservice.order_service.business.dto.user.UserDTO;
 import com.loupfitorderservice.order_service.business.mapper.OrderConverter;
 import com.loupfitorderservice.order_service.infrastructure.entity.Order;
 import com.loupfitorderservice.order_service.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfitorderservice.order_service.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfitorderservice.order_service.infrastructure.repository.OrderRepository;
 import com.loupfitorderservice.order_service.infrastructure.security.client.UserClient;
 import com.loupfitorderservice.order_service.infrastructure.security.product.ProductClient;
@@ -39,7 +40,7 @@ public class OrderService {
             return new UserDTO(user.getUsername(), user.getRole());
         }
 
-        throw new ConflictExcpetion("Usuário(a) não encontrado(a) " + username);
+        throw new ResourceNotFoundException("Usuário(a) não encontrado(a) " + username);
 
     }
 
@@ -51,7 +52,7 @@ public class OrderService {
         ProductDTO product = productClient.getProductById(token, dto.getProductId());
 
         if (product == null) {
-            throw new ConflictExcpetion("Produto não encontrado");
+            throw new ResourceNotFoundException("Produto não encontrado");
         }
 
         if (product.getStock() < dto.getQuantity()) {
@@ -89,14 +90,14 @@ public class OrderService {
                     orderRepository.findAll()
             );
         } catch (ConflictExcpetion e) {
-            throw new ConflictExcpetion(e.getMessage());
+            throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
     public OrderDTO removeSale(String id) {
 
         Order order = orderRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Registro de venda não encontrada")
+                () -> new ResourceNotFoundException("Registro de venda não encontrada")
         );
 
         orderRepository.deleteById(id);
