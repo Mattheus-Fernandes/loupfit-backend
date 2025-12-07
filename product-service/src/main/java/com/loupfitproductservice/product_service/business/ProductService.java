@@ -11,6 +11,8 @@ import com.loupfitproductservice.product_service.infrastructure.client.UserClien
 import com.loupfitproductservice.product_service.infrastructure.entity.Product;
 import com.loupfitproductservice.product_service.infrastructure.enums.UserRole;
 import com.loupfitproductservice.product_service.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfitproductservice.product_service.infrastructure.exceptions.ForbiddenException;
+import com.loupfitproductservice.product_service.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfitproductservice.product_service.infrastructure.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.config.ConfigDataException;
@@ -43,7 +45,7 @@ public class ProductService {
             return new UserDTO(userDTO.getUsername(), userDTO.getRole());
         }
 
-        throw new ConflictExcpetion("Usuário(a) não encontrado(a) " + username);
+        throw new ResourceNotFoundException("Usuário(a) não encontrado(a) " + username);
     }
 
     public ProductDTO addProduct(String token, ProductDTO dto, MultipartFile file) {
@@ -81,8 +83,8 @@ public class ProductService {
             return productConverter.productsDTOList(
                     productRepository.findAll()
             );
-        } catch (ConflictExcpetion e) {
-            throw new ConflictExcpetion(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
@@ -91,7 +93,7 @@ public class ProductService {
 
             return productConverter.productDTO(
                     productRepository.findById(id).orElseThrow(
-                            () -> new ConflictExcpetion("Nenhum produto encontrado")
+                            () -> new ResourceNotFoundException("Nenhum produto encontrado")
                     )
             );
 
@@ -118,13 +120,13 @@ public class ProductService {
             }
 
             if (products.isEmpty()) {
-                throw new ConflictExcpetion("Nenhum produto encontrado");
+                throw new ResourceNotFoundException("Nenhum produto encontrado");
             }
 
             return productConverter.productsDTOList(products);
 
-        } catch (ConfigDataException e) {
-            throw new ConflictExcpetion(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
 
         }
     }
@@ -135,12 +137,12 @@ public class ProductService {
             List<Product> products = productRepository.findByStockLessThan(4);
 
             if (products.isEmpty()) {
-                throw new ConflictExcpetion("Nenhum produto com baixo estoque encontrado.");
+                throw new ResourceNotFoundException("Nenhum produto com baixo estoque encontrado.");
             }
 
             return productConverter.productsDTOList(products);
-        } catch (ConflictExcpetion e) {
-            throw new ConflictExcpetion(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
@@ -150,12 +152,12 @@ public class ProductService {
             List<Product> products = productRepository.findBySalesGreaterThan(10);
 
             if (products.isEmpty()) {
-                throw new ConflictExcpetion("Nenhum produto encontrado.");
+                throw new ResourceNotFoundException("Nenhum produto encontrado.");
             }
 
             return productConverter.productsDTOList(products);
-        } catch (ConflictExcpetion e) {
-            throw new ConflictExcpetion(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
@@ -166,11 +168,11 @@ public class ProductService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar produto.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar produto.");
         }
 
         Product entity = productRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Produto não encontrado")
+                () -> new ResourceNotFoundException("Produto não encontrado")
         );
 
         productUpdateConverter.productUpdateJson(dto, entity);
@@ -185,11 +187,11 @@ public class ProductService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar produto.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar produto.");
         }
 
         Product entity = productRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Produto não encontrado")
+                () -> new ResourceNotFoundException("Produto não encontrado")
         );
 
         String operation = dto.getOperation().toUpperCase();
@@ -255,11 +257,11 @@ public class ProductService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar produto.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar produto.");
         }
 
         Product entity = productRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Produto não encontrado")
+                () -> new ResourceNotFoundException("Produto não encontrado")
         );
 
         productUpdateConverter.productUpdatePrice(price, entity);
@@ -275,11 +277,11 @@ public class ProductService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para editar produto.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar produto.");
         }
 
         Product entity = productRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Produto não encontrado")
+                () -> new ResourceNotFoundException("Produto não encontrado")
         );
 
         // Remove Image from MinIO
@@ -306,11 +308,11 @@ public class ProductService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
 
         if (!permitted) {
-            throw new ConflictExcpetion("OPSS! Você não tem PERMISSÃO para excluir produto.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para excluir produto.");
         }
 
         Product entity = productRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Produto não encontrado")
+                () -> new ResourceNotFoundException("Produto não encontrado")
         );
 
         // First remove from MIniO
