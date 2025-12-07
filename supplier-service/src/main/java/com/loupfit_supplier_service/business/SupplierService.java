@@ -10,6 +10,8 @@ import com.loupfit_supplier_service.infrastructure.client.UserClient;
 import com.loupfit_supplier_service.infrastructure.entity.Supplier;
 import com.loupfit_supplier_service.infrastructure.enums.UserRole;
 import com.loupfit_supplier_service.infrastructure.exceptions.ConflictException;
+import com.loupfit_supplier_service.infrastructure.exceptions.ForbiddenException;
+import com.loupfit_supplier_service.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfit_supplier_service.infrastructure.repository.SupplierRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -39,7 +41,7 @@ public class SupplierService {
             return new AuthenticatedUser(userDTO.getUsername(), userDTO.getRole());
         }
 
-        throw new ConflictException("Usuário(a) não encontrado(a) " + username);
+        throw new ResourceNotFoundException("Usuário(a) não encontrado(a) " + username);
     }
 
     public SupplierDTO addSupplier(SupplierDTO dto) {
@@ -74,8 +76,8 @@ public class SupplierService {
             return supplierConverter.supplierDTOList(
                     supplierRepository.findAll()
             );
-        } catch (ConflictException e) {
-            throw new ConflictException(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
@@ -86,8 +88,8 @@ public class SupplierService {
             return supplierConverter.supplierDTOList(
                     supplierRepository.findBySupplierNameContainsIgnoreCase(name)
             );
-        } catch (ConflictException e) {
-            throw new ConflictException(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
@@ -98,11 +100,11 @@ public class SupplierService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
 
         if (!permitted) {
-            throw new ConflictException("OPSS! Você não tem PERMISSÃO para excluir fornecedor.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para excluir fornecedor.");
         }
 
         Supplier entity = supplierRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Fornecedor não encontrado")
+                () -> new ResourceNotFoundException("Fornecedor não encontrado")
         );
 
         supplierRepository.deleteById(id);
@@ -117,11 +119,11 @@ public class SupplierService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
 
         if (!permitted) {
-            throw new ConflictException("OPSS! Você não tem PERMISSÃO para editar fornecedor.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar fornecedor.");
         }
 
         Supplier entityEdit = supplierRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Fornecedor não encontrado")
+                () -> new ResourceNotFoundException("Fornecedor não encontrado")
         );
 
         supplierUpdateConverter.supplierUpdate(dto, entityEdit);
@@ -135,11 +137,11 @@ public class SupplierService {
         boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
 
         if (!permitted) {
-            throw new ConflictException("OPSS! Você não tem PERMISSÃO para editar fornecedor.");
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar fornecedor.");
         }
 
         Supplier entityEdit = supplierRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Fornecedor não encontrado")
+                () -> new ResourceNotFoundException("Fornecedor não encontrado")
         );
 
         entityEdit.setActive(dto.active);
