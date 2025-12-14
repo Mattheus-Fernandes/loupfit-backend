@@ -6,11 +6,10 @@ import com.loupfituserservice.userservice.business.dto.user.UserDTO;
 import com.loupfituserservice.userservice.business.dto.user.UserRoleDTO;
 import com.loupfituserservice.userservice.business.dto.user.UsernameDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.User;
-import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictException;
+import com.loupfituserservice.userservice.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfituserservice.userservice.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,10 +37,10 @@ public class UserService {
             boolean exist = userRepository.existsByUsername(username);
 
             if (exist) {
-                throw new ConflictExcpetion("Usuário(a) já cadastrado(a) " + username);
+                throw new ConflictException("Usuário(a) já cadastrado(a) " + username);
             }
-        } catch (ConflictExcpetion e) {
-            throw new ConflictExcpetion(e.getMessage());
+        } catch (ConflictException e) {
+            throw new ConflictException(e.getMessage());
         }
     }
 
@@ -55,19 +54,19 @@ public class UserService {
         try {
             return userConverter.userDTO(
                     userRepository.findByUsername(username).orElseThrow(
-                            () -> new ConflictExcpetion("Usuário não encontrado " + username)
+                            () -> new ResourceNotFoundException("Usuário não encontrado " + username)
                     )
             );
 
-        } catch (ConflictExcpetion e) {
-            throw new ConflictExcpetion(e.getMessage());
+        } catch (ConflictException e) {
+            throw new ConflictException(e.getMessage());
         }
     }
 
     public UserDTO removeUser(Long id) {
 
         User userDelete = userRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado")
+                () -> new ResourceNotFoundException("Usuário não encontrado")
         );
 
         userRepository.deleteById(id);
@@ -80,7 +79,7 @@ public class UserService {
         dto.setPassword(dto.getPassword() != null ? passwordEncoder.encode(dto.getPassword()) : null);
 
         User userEntity = userRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado")
+                () -> new ResourceNotFoundException("Usuário não encontrado")
         );
 
         User editUser = userConverter.userUpdate(dto, userEntity);
@@ -92,7 +91,7 @@ public class UserService {
     public UserDTO editRoleUser(Long id, UserRoleDTO dto) {
 
         User entity = userRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado")
+                () -> new ResourceNotFoundException("Usuário não encontrado")
         );
 
         if (dto.getRole() != null) {
@@ -105,7 +104,7 @@ public class UserService {
     public UserDTO editUsername(Long id, UsernameDTO dto) {
 
         User entity = userRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado")
+                () -> new ResourceNotFoundException("Usuário não encontrado")
         );
 
         if (dto.getUsername() != null) {

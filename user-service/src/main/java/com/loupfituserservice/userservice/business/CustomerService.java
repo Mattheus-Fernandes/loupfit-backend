@@ -4,7 +4,8 @@ import com.loupfituserservice.userservice.business.converter.CustomerConverter;
 import com.loupfituserservice.userservice.business.dto.customer.CustomerDTO;
 import com.loupfituserservice.userservice.business.dto.customer.CustomerReqDTO;
 import com.loupfituserservice.userservice.infrastructure.entity.Customer;
-import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictException;
+import com.loupfituserservice.userservice.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfituserservice.userservice.infrastructure.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -37,15 +38,15 @@ public class CustomerService {
     public void validateCustomer(CustomerReqDTO dto) {
 
         if (customerRepository.existsByUsername(dto.getUsername())) {
-            throw new ConflictExcpetion("Usuário(a) já em uso " + dto.getUsername());
+            throw new ConflictException("Usuário(a) já em uso " + dto.getUsername());
         }
 
         if (customerRepository.existsByEmail(dto.getEmail())) {
-            throw new ConflictExcpetion("E-mail já em uso  " + dto.getEmail());
+            throw new ConflictException("E-mail já em uso  " + dto.getEmail());
         }
 
         if (customerRepository.existsByCpf(dto.getCpf())) {
-            throw new ConflictExcpetion("CPF já cadastrado  " + dto.getCpf());
+            throw new ConflictException("CPF já cadastrado  " + dto.getCpf());
         }
 
     }
@@ -59,7 +60,7 @@ public class CustomerService {
         String username = auth.getName();
 
         Customer entity = customerRepository.findByUsername(username).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado " + username)
+                () -> new ResourceNotFoundException("Usuário não encontrado " + username)
         );
 
         return customerConverter.customerDTO(entity);
@@ -71,7 +72,7 @@ public class CustomerService {
         String username = auth.getName();
 
         Customer entity = customerRepository.findByUsername(username).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado " + username)
+                () -> new ResourceNotFoundException("Usuário não encontrado " + username)
         );
 
         Customer entityEdit = customerConverter.updateCustomer(dto, entity);
@@ -88,7 +89,7 @@ public class CustomerService {
 
     public CustomerDTO removeCustomer(Long id) {
         Customer entity = customerRepository.findById(id).orElseThrow(
-                () -> new ConflictExcpetion("Usuário não encontrado")
+                () -> new ResourceNotFoundException("Usuário não encontrado")
         );
 
         customerRepository.deleteById(id);

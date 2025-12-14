@@ -3,7 +3,8 @@ package com.loupfitassetservice.asset_service.infrastructure.security;
 
 import com.loupfitassetservice.asset_service.business.dto.UserDTO;
 import com.loupfitassetservice.asset_service.infrastructure.client.UserClient;
-import com.loupfitassetservice.asset_service.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfitassetservice.asset_service.infrastructure.exceptions.ConflictException;
+import com.loupfitassetservice.asset_service.infrastructure.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.User;
@@ -26,7 +27,7 @@ public class UserDetailsServiceImpl {
                     .roles(userDTO.getRole().name())
                     .build();
         } catch (UsernameNotFoundException e) {
-            throw new ConflictExcpetion("Usuário não encontrado");
+            throw new ResourceNotFoundException("Usuário não encontrado");
         }
     }
 }
