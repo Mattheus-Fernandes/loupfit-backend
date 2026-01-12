@@ -1,8 +1,8 @@
 package com.loupfituserservice.userservice.controller;
 
 import com.loupfituserservice.userservice.business.CustomerService;
-import com.loupfituserservice.userservice.business.dto.customer.CustomerDTO;
-import com.loupfituserservice.userservice.business.dto.customer.CustomerReqDTO;
+import com.loupfituserservice.userservice.business.record.customer.in.CustomerRequest;
+import com.loupfituserservice.userservice.business.record.customer.out.CustomerResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,29 +17,29 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @PostMapping
-    public ResponseEntity<CustomerDTO> saveCustomer(@RequestBody CustomerReqDTO dto) {
-        return ResponseEntity.ok(customerService.addCustomer(dto));
+    public ResponseEntity<CustomerResponse> saveCustomer(@RequestBody CustomerRequest request) {
+        return ResponseEntity.ok(customerService.addCustomer(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<CustomerDTO>> findAllCustomers() {
+    public ResponseEntity<List<CustomerResponse>> findAllCustomers() {
         return  ResponseEntity.ok(customerService.filterAllCustomers());
     }
 
     @GetMapping("/current")
-    public ResponseEntity<CustomerDTO> findByCurrentUser() {
+    public ResponseEntity<CustomerResponse> findByCurrentUser() {
         return ResponseEntity.ok(customerService.filterCurrentUser());
     }
 
     @PutMapping
-    public ResponseEntity<CustomerDTO> updateCustomer(
-            @RequestBody CustomerReqDTO dto
+    public ResponseEntity<CustomerResponse> updateCustomer(
+            @RequestBody CustomerRequest request
     ){
-        return ResponseEntity.ok(customerService.editCustomer(dto));
+        return ResponseEntity.ok(customerService.editCustomer(request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CustomerDTO> deleteCustomer(
+    public ResponseEntity<CustomerResponse> deleteCustomer(
             @PathVariable Long id
     ) {
         return ResponseEntity.ok(customerService.removeCustomer(id));

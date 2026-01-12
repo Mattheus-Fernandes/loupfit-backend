@@ -1,20 +1,10 @@
 package com.loupfituserservice.userservice.controller;
 
 import com.loupfituserservice.userservice.business.UserService;
-import com.loupfituserservice.userservice.business.dto.user.UserReqDTO;
-import com.loupfituserservice.userservice.business.dto.user.UserDTO;
-import com.loupfituserservice.userservice.business.dto.LoginDTO;
-import com.loupfituserservice.userservice.business.dto.user.UserRoleDTO;
-import com.loupfituserservice.userservice.business.dto.user.UsernameDTO;
-import com.loupfituserservice.userservice.infrastructure.security.JwtUtil;
+import com.loupfituserservice.userservice.business.record.user.in.*;
+import com.loupfituserservice.userservice.business.record.user.out.UserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,49 +17,48 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserDTO> saveUser(@RequestBody UserReqDTO newUser) {
+    public ResponseEntity<UserResponse> saveUser(@RequestBody UserRequest newUser) {
         return ResponseEntity.ok(userService.addUser(newUser));
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> findUser() {
+    public ResponseEntity<List<UserResponse>> findUser() {
         return ResponseEntity.ok(userService.filterAllUsers());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<UserDTO> findUserByUsername(@RequestParam("username") String username) {
+    public ResponseEntity<UserResponse> findUserByUsername(@RequestParam("username") String username) {
         return ResponseEntity.ok(userService.filterByUsername(username));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> deleteUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.removeUser(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(
+    public ResponseEntity<UserResponse> updateUser(
             @PathVariable Long id,
-            @RequestBody UserReqDTO userEditDTO
+            @RequestBody UserRequest request
     ) {
 
-        return ResponseEntity.ok(userService.editUser(id, userEditDTO));
+        return ResponseEntity.ok(userService.editUser(id, request));
     }
 
     @PatchMapping("/{id}/role")
-    public ResponseEntity<UserDTO> updateRoleUser(
+    public ResponseEntity<UserResponse> updateRoleUser(
             @PathVariable Long id,
-            @RequestBody UserRoleDTO dto
+            @RequestBody UserRoleRequest request
     ) {
-        return ResponseEntity.ok(userService.editRoleUser(id, dto));
+        return ResponseEntity.ok(userService.editRoleUser(id, request));
     }
 
     @PatchMapping("/{id}/username")
-    public ResponseEntity<UserDTO> updateUsernameUser(
+    public ResponseEntity<UserResponse> updateUsernameUser(
             @PathVariable Long id,
-            @RequestBody UsernameDTO dto
+            @RequestBody UsernameRequest request
     ) {
-        return ResponseEntity.ok(userService.editUsername(id, dto));
+        return ResponseEntity.ok(userService.editUsername(id, request));
     }
-
 
 }
