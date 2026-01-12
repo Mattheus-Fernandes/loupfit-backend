@@ -1,10 +1,9 @@
 package com.loupfituserservice.userservice.business;
 
-import com.loupfituserservice.userservice.business.converter.UserConverter;
-import com.loupfituserservice.userservice.business.dto.user.UserReqDTO;
-import com.loupfituserservice.userservice.business.dto.user.UserDTO;
-import com.loupfituserservice.userservice.business.dto.user.UserRoleDTO;
-import com.loupfituserservice.userservice.business.dto.user.UsernameDTO;
+import com.loupfituserservice.userservice.business.record.user.in.*;
+import com.loupfituserservice.userservice.business.record.user.out.UserResponse;
+import com.loupfituserservice.userservice.business.mapper.UserConverter;
+import com.loupfituserservice.userservice.business.mapper.UserUpdateConverter;
 import com.loupfituserservice.userservice.infrastructure.entity.User;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictException;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ResourceNotFoundException;
@@ -21,15 +20,25 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserConverter userConverter;
+    private final UserUpdateConverter userUpdateConverter;
     private final PasswordEncoder passwordEncoder;
 
-    public UserDTO addUser(UserReqDTO dto) {
-        existUsername(dto.getUsername());
-        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
+    public UserResponse addUser(UserRequest request) {
+        existUsername(request.username());
 
-        User newUser = userConverter.userCreate(dto);
+        String password = request.password() != null ? passwordEncoder.encode(request.password()) : null;
 
-        return userConverter.userDTO(userRepository.save(newUser));
+        UserRequest data = new UserRequest(
+                request.name(),
+                request.lastname(),
+                request.username(),
+                password,
+                request.role()
+        );
+
+        User user = userConverter.toEntity(data);
+
+        return userConverter.toResponse(userRepository.save(user));
     }
 
     public void existUsername(String username) {
@@ -44,15 +53,15 @@ public class UserService {
         }
     }
 
-    public List<UserDTO> filterAllUsers() {
+    public List<UserResponse> filterAllUsers() {
         List<User> userList = userRepository.findAll();
 
-        return userConverter.userDTOList(userList);
+        return userConverter.toResponseList(userList);
     }
 
-    public UserDTO filterByUsername(String username) {
+    public UserResponse filterByUsername(String username) {
         try {
-            return userConverter.userDTO(
+            return userConverter.toResponse(
                     userRepository.findByUsername(username).orElseThrow(
                             () -> new ResourceNotFoundException("Usuário não encontrado " + username)
                     )
@@ -63,7 +72,7 @@ public class UserService {
         }
     }
 
-    public UserDTO removeUser(Long id) {
+    public UserResponse removeUser(Long id) {
 
         User userDelete = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Usuário não encontrado")
@@ -71,47 +80,55 @@ public class UserService {
 
         userRepository.deleteById(id);
 
-        return userConverter.userDTO(userDelete);
+        return userConverter.toResponse(userDelete);
     }
 
-    public UserDTO editUser(Long id, UserReqDTO dto) {
+    public UserResponse editUser(Long id, UserRequest request) {
 
-        dto.setPassword(dto.getPassword() != null ? passwordEncoder.encode(dto.getPassword()) : null);
+        String password = request.password() != null ? passwordEncoder.encode(request.password()) : null;
+
+        UserRequest data = new UserRequest(
+                request.name(),
+                request.lastname(),
+                request.username(),
+                password,
+                request.role()
+        );
 
         User userEntity = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Usuário não encontrado")
         );
 
-        User editUser = userConverter.userUpdate(dto, userEntity);
+        User editUser = userUpdateConverter.doUpdate(data, userEntity);
 
-        return userConverter.userDTO(userRepository.save(editUser));
+        return userConverter.toResponse(userRepository.save(editUser));
 
     }
 
-    public UserDTO editRoleUser(Long id, UserRoleDTO dto) {
+    public UserResponse editRoleUser(Long id, UserRoleRequest request) {
 
         User entity = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Usuário não encontrado")
         );
 
-        if (dto.getRole() != null) {
-            entity.setRole(dto.getRole());
+        if (request.role() != null) {
+            entity.setRole(request.role());
         }
 
-        return userConverter.userDTO(userRepository.save(entity));
+        return userConverter.toResponse(userRepository.save(entity));
     }
 
-    public UserDTO editUsername(Long id, UsernameDTO dto) {
+    public UserResponse editUsername(Long id, UsernameRequest request) {
 
         User entity = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Usuário não encontrado")
         );
 
-        if (dto.getUsername() != null) {
-            entity.setUsername(dto.getUsername());
+        if (request.username() != null) {
+            entity.setUsername(request.username());
         }
 
-        return userConverter.userDTO(userRepository.save(entity));
+        return userConverter.toResponse(userRepository.save(entity));
 
     }
 
