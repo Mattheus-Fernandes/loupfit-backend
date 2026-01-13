@@ -94,11 +94,11 @@ services:
   supplier-service:
     image: mattfernandes/supplier-service:1.1
     ports:
-      - "${SUPPLIER_SERVICE_PORT}:${SUPPLIER_SERVICE_PORT}"
+      - "${SUPPLIER_SERVICE_PORT}:8083"
     depends_on:
       - supplierdb-mongodb
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://supplierdb-mongodb:27017/${MONGO_DB_CONSUMABLES}
+      SPRING_DATA_MONGODB_URI: mongodb://supplierdb-mongodb:27017/${MONGO_DB_SUPPLIER}
     networks:
       - loupfit-network
 
@@ -166,9 +166,9 @@ services:
   order-service:
     image: mattfernandes/order-service:1.1
     ports:
-      - "${ORDER_SERVICE_PORT}:${ORDER_SERVICE_PORT}"
+      - "${ORDER_SERVICE_PORT}:8085"
     depends_on:
-      - supplierdb-mongodb
+      - orderdb-mongodb
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://orderdb-mongodb:27017/${MONGO_DB_ORDER}
     networks:

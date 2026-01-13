@@ -1,6 +1,6 @@
 package com.loupfituserservice.userservice.controller;
 
-import com.loupfituserservice.userservice.business.dto.LoginDTO;
+import com.loupfituserservice.userservice.business.record.LoginRequest;
 import com.loupfituserservice.userservice.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,10 +24,10 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping
-    public ResponseEntity<String> doLogin(@RequestBody LoginDTO dto) {
+    public ResponseEntity<String> doLogin(@RequestBody LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
 
             String token = jwtUtil.generateToken(authentication.getName());
