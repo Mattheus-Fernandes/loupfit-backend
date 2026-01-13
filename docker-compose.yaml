@@ -23,7 +23,7 @@ services:
   user-service:
     image: mattfernandes/user-service:1.1
     ports:
-      - "${USER_SERVICE_PORT}:8089"
+      - "${USER_SERVICE_PORT}:8080"
     depends_on:
       - userdb-postgres
     environment:
@@ -94,11 +94,11 @@ services:
   supplier-service:
     image: mattfernandes/supplier-service:1.0
     ports:
-      - "${SUPPLIER_SERVICE_PORT}:${SUPPLIER_SERVICE_PORT}"
+      - "${SUPPLIER_SERVICE_PORT}:8083"
     depends_on:
       - supplierdb-mongodb
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://supplierdb-mongodb:27017/${MONGO_DB_CONSUMABLES}
+      SPRING_DATA_MONGODB_URI: mongodb://supplierdb-mongodb:27017/${MONGO_DB_SUPPLIER}
     networks:
       - loupfit-network
 
@@ -166,11 +166,33 @@ services:
   order-service:
     image: mattfernandes/order-service:1.0
     ports:
-      - "${ORDER_SERVICE_PORT}:${ORDER_SERVICE_PORT}"
+      - "${ORDER_SERVICE_PORT}:8085"
     depends_on:
-      - supplierdb-mongodb
+      - orderdb-mongodb
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://orderdb-mongodb:27017/${MONGO_DB_ORDER}
     networks:
       - loupfit-network
 
+  # BFF service
+  bff-service:
+    image: mattfernandes/bff-service:1.0
+    container_name: bff-service
+    ports:
+      - "${BFF_SERVICE_PORT}:8001"
+    depends_on:
+      - user-service
+      - asset-service
+      - consumables-service
+      - supplier-service
+      - product-service
+      - order-service
+    environment:
+      USER_URL: http://user-service:8080
+      PRODUCT_URL: http://product-service:8084
+      ASSET_URL: http://asset-service:8081
+      CONSUMABLES_URL: http://consumables-service:8082
+      SUPPLIER_URL: http://supplier-service:8083
+      ORDER_URL: http://order-service:8085
+    networks:
+      - loupfit-network
