@@ -21,7 +21,7 @@ services:
 
   # User service
   user-service:
-    image: mattfernandes/user-service:1.1
+    image: mattfernandes/user-service:1.2
     ports:
       - "${USER_SERVICE_PORT}:8080"
     depends_on:
@@ -46,7 +46,7 @@ services:
 
   # Asset service
   asset-service:
-    image: mattfernandes/asset-service:1.1
+    image: mattfernandes/asset-service:1.2
     ports:
       - "${ASSET_SERVICE_PORT}:8081"
     depends_on:
@@ -69,7 +69,7 @@ services:
 
   # Consumables service
   consumables-service:
-      image: mattfernandes/consumables-service:1.1
+      image: mattfernandes/consumables-service:1.2
       ports:
         - "${CONSUMABLES_SERVICE_PORT}:8082"
       depends_on:
@@ -92,7 +92,7 @@ services:
 
   # Supplier service
   supplier-service:
-    image: mattfernandes/supplier-service:1.0
+    image: mattfernandes/supplier-service:1.1
     ports:
       - "${SUPPLIER_SERVICE_PORT}:8083"
     depends_on:
@@ -118,7 +118,7 @@ services:
 
   # Product service
   product-service:
-    image: mattfernandes/product-service:1.1
+    image: mattfernandes/product-service:1.2
     ports:
       - "${PRODUCT_SERVICE_PORT}:8084"
     depends_on:
@@ -164,7 +164,7 @@ services:
 
   # Order service
   order-service:
-    image: mattfernandes/order-service:1.0
+    image: mattfernandes/order-service:1.1
     ports:
       - "${ORDER_SERVICE_PORT}:8085"
     depends_on:
