@@ -4,13 +4,13 @@ import com.loupfit.bffservice.business.dto.out.UserDTO;
 import com.loupfit.bffservice.business.dto.in.UserReqDTO;
 import com.loupfit.bffservice.business.dto.in.UserRoleDTO;
 import com.loupfit.bffservice.business.dto.in.UsernameReqDTO;
-import com.loupfit.bffservice.infrastructure.client.config.UserClientConfig;
+import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "user-service-one", url = "${user.url}", configuration = UserClientConfig.class)
+@FeignClient(name = "user-service-one", url = "${user.url}", configuration = FeignConfig.class)
 public interface UserClient {
 
     @GetMapping("/user/search")

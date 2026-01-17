@@ -1,13 +1,13 @@
 package com.loupfit.bffservice.infrastructure.client;
 
 import com.loupfit.bffservice.business.dto.out.OrderDTO;
-import com.loupfit.bffservice.infrastructure.client.config.OrderClientConfig;
+import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "order-service", url = "${order.url}", configuration = OrderClientConfig.class)
+@FeignClient(name = "order-service", url = "${order.url}", configuration = FeignConfig.class)
 public interface OrderClient {
 
     @PostMapping("/orders")

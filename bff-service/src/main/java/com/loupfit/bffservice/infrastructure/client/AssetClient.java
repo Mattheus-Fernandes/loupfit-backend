@@ -1,13 +1,13 @@
 package com.loupfit.bffservice.infrastructure.client;
 
 import com.loupfit.bffservice.business.dto.out.AssetDTO;
-import com.loupfit.bffservice.infrastructure.client.config.AssetClientConfig;
+import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "asset-service", url = "${asset.url}", configuration = AssetClientConfig.class)
+@FeignClient(name = "asset-service", url = "${asset.url}", configuration = FeignConfig.class)
 public interface AssetClient {
 
 

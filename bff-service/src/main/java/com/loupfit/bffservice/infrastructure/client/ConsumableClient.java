@@ -2,14 +2,14 @@ package com.loupfit.bffservice.infrastructure.client;
 
 import com.loupfit.bffservice.business.dto.in.ConsumablesQuantityDTO;
 import com.loupfit.bffservice.business.dto.out.ConsumablesDTO;
-import com.loupfit.bffservice.infrastructure.client.config.ConsumableClientConfig;
+import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
-@FeignClient(name = "consumable-service", url = "${consumable.url}", configuration = ConsumableClientConfig.class)
+@FeignClient(name = "consumable-service", url = "${consumable.url}", configuration = FeignConfig.class)
 public interface ConsumableClient {
 
     @PostMapping("/consumables")
