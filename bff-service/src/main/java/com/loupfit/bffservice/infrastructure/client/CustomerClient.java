@@ -2,13 +2,13 @@ package com.loupfit.bffservice.infrastructure.client;
 
 import com.loupfit.bffservice.business.dto.out.CustomerDTO;
 import com.loupfit.bffservice.business.dto.in.CustomerReqDTO;
-import com.loupfit.bffservice.infrastructure.client.config.UserClientConfig;
+import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "user-service-two", url = "${user.url}", configuration = UserClientConfig.class)
+@FeignClient(name = "user-service-two", url = "${user.url}", configuration = FeignConfig.class)
 public interface CustomerClient {
 
     @PostMapping("/customer")

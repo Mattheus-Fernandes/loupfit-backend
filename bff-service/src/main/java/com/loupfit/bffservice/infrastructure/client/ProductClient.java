@@ -4,7 +4,7 @@ import com.loupfit.bffservice.business.dto.in.ProductUpdateJsonDTO;
 import com.loupfit.bffservice.business.dto.in.ProductUpdatePriceDTO;
 import com.loupfit.bffservice.business.dto.in.ProductUpdateStockSalesDTO;
 import com.loupfit.bffservice.business.dto.out.ProductDTO;
-import com.loupfit.bffservice.infrastructure.client.config.ProductClientConfig;
+import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@FeignClient(name = "product-service", url = "${product.url}", configuration = ProductClientConfig.class)
+@FeignClient(name = "product-service", url = "${product.url}", configuration = FeignConfig.class)
 public interface ProductClient {
 
     @PostMapping(value = "/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
