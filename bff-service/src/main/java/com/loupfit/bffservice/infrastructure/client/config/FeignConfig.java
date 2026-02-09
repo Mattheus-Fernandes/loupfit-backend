@@ -12,4 +12,9 @@ public class FeignConfig {
     public FeignError feignClient() {
         return new FeignError();
     }
+
+    @Bean
+    public Client feignErrorDecoder() {
+        return new ApacheHttpClient();
+    }
 }
