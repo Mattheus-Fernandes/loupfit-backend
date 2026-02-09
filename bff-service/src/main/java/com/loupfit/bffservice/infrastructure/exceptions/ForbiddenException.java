@@ -1,11 +1,13 @@
 package com.loupfit.bffservice.infrastructure.exceptions;
 
-public class ForbiddenException extends RuntimeException {
-    public ForbiddenException(String message) {
-        super(message);
-    }
+import com.loupfit.bffservice.business.record.error.ApiError;
 
-    public ForbiddenException(String message, Throwable throwable) {
-        super(message, throwable);
+public class ForbiddenException extends RuntimeException {
+
+    private final ApiError apiError;
+
+    public ForbiddenException(ApiError apiError) {
+        super(apiError.msg());
+        this.apiError = apiError;
     }
 }
