@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface AssetRepository extends MongoRepository<Asset, String> {
 
-    boolean existsByAssetName(String assetName);
+    boolean existsByName(String assetName);
     List<Asset> findByCreatedBy(String createdBy);
 }

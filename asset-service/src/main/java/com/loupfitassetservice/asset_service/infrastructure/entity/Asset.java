@@ -16,11 +16,11 @@ public class Asset {
 
     @Id
     private String id;
-    private String assetName;
+    private String name;
     private String description;
     private Integer quantity;
     private BigDecimal costValue;
-    private String supplier;
+    private String placePurchase;
     private String createdBy;
 
 }
