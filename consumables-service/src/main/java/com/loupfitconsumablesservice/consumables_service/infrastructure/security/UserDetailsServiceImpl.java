@@ -1,7 +1,7 @@
 package com.loupfitconsumablesservice.consumables_service.infrastructure.security;
 
 
-import com.loupfitconsumablesservice.consumables_service.business.dto.UserDTO;
+import com.loupfitconsumablesservice.consumables_service.business.record.user.out.UserResponse;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.client.UserClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -16,10 +16,10 @@ public class UserDetailsServiceImpl {
 
     public UserDetails dataUser(String token, String username) {
         String bearerToken = "Bearer " + token;
-        UserDTO userDTO = userClient.findUserByUsername(bearerToken, username);
+        UserResponse user = userClient.findUserByUsername(bearerToken, username);
 
         return User
-                .withUsername(userDTO.getUsername())
+                .withUsername(user.username())
                 .password("N/A")
                 .build();
     }
