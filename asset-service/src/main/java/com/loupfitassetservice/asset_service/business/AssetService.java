@@ -1,10 +1,11 @@
 package com.loupfitassetservice.asset_service.business;
 
-import com.loupfitassetservice.asset_service.business.dto.AssetDTO;
-import com.loupfitassetservice.asset_service.business.dto.AuthenticatedUserDTO;
-import com.loupfitassetservice.asset_service.business.dto.UserDTO;
 import com.loupfitassetservice.asset_service.business.mapper.AssetConverter;
 import com.loupfitassetservice.asset_service.business.mapper.AssetUpdateConverter;
+import com.loupfitassetservice.asset_service.business.record.asset.in.AssetRequest;
+import com.loupfitassetservice.asset_service.business.record.asset.out.AssetResponse;
+import com.loupfitassetservice.asset_service.business.record.user.out.UserAuthenticatedResponse;
+import com.loupfitassetservice.asset_service.business.record.user.out.UserResponse;
 import com.loupfitassetservice.asset_service.infrastructure.client.UserClient;
 import com.loupfitassetservice.asset_service.infrastructure.entity.Asset;
 import com.loupfitassetservice.asset_service.infrastructure.enums.UserRole;
@@ -28,38 +29,46 @@ public class AssetService {
     private final UserClient userClient;
     private final AssetUpdateConverter assetUpdateConverter;
 
-    private AuthenticatedUserDTO userAuthenticated(String token) {
+    private UserAuthenticatedResponse userAuthenticated(String token) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        UserDTO userDTO = userClient.getUserByUsername(token, username);
+        UserResponse user = userClient.getUserByUsername(token, username);
 
-        if (userDTO != null && userDTO.getUsername() != null) {
-            return new AuthenticatedUserDTO(userDTO.getUsername(), userDTO.getRole());
+        if (user != null && user.username() != null) {
+            return new UserAuthenticatedResponse(user.username(), user.role());
         }
 
         throw new ResourceNotFoundException("Usuário(a) não encontrado(a) " + username);
 
     }
 
-    public AssetDTO addAsset(String token, AssetDTO assetDTO) {
+    public AssetResponse addAsset(String token, AssetRequest request) {
 
-        AuthenticatedUserDTO user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        existAsset(assetDTO.getAssetName());
+        existAsset(request.name());
 
-        assetDTO.setCreatedBy(user.getUsername());
+        AssetRequest data = new AssetRequest(
+                request.name(),
+                request.description(),
+                request.quantity(),
+                request.costValue(),
+                request.placePurchase(),
+                user.username()
+        );
 
-        Asset assetEntity = assetConverter.assetEntity(assetDTO);
+        Asset asset = assetConverter.toEntity(data);
 
-        return assetConverter.assetDTO(assetRepository.save(assetEntity));
+        return assetConverter.toResponse(assetRepository.save(asset));
+
     }
 
     public void existAsset(String assetName) {
 
         try {
-            boolean exist = assetRepository.existsByAssetName(assetName);
+            boolean exist = assetRepository.existsByName(assetName);
 
             if (exist) {
                 throw new ConflictException("Equipamento já cadastrado " + assetName);
@@ -70,19 +79,19 @@ public class AssetService {
         }
     }
 
-    public List<AssetDTO> filterAllAssets() {
-        return assetConverter.assetDTOList(assetRepository.findAll());
+    public List<AssetResponse> filterAllAssets() {
+        return assetConverter.toResponseList(assetRepository.findAll());
     }
 
-    public List<AssetDTO> assetAddedByCreatedBy(String username) {
-        return assetConverter.assetDTOList(assetRepository.findByCreatedBy(username));
+    public List<AssetResponse> assetAddedByCreatedBy(String username) {
+        return assetConverter.toResponseList(assetRepository.findByCreatedBy(username));
     }
 
-    public AssetDTO removeAsset(String token, String id) {
+    public AssetResponse removeAsset(String token, String id) {
 
-        AuthenticatedUserDTO user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
+        boolean permitted = user.role() == UserRole.OWNER || user.role() == UserRole.ADMIN;
 
         if (!permitted) {
             throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para excluir o equipamento.");
@@ -94,27 +103,36 @@ public class AssetService {
 
         assetRepository.delete(assetDelete);
 
-        return assetConverter.assetDTO(assetDelete);
+        return assetConverter.toResponse(assetDelete);
 
     }
 
-    public AssetDTO editAsset(String token, String id, AssetDTO assetDTO) {
+    public AssetResponse editAsset(String token, String id, AssetRequest request) {
 
-        AuthenticatedUserDTO user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+        boolean permitted = user.role() == UserRole.OWNER || user.role() == UserRole.ADMIN || user.role() == UserRole.EDITOR;
 
         if (!permitted) {
             throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar o equipamento.");
         }
 
-        Asset assetEdit = assetRepository.findById(id).orElseThrow(
+        AssetRequest data = new AssetRequest(
+                request.name(),
+                request.description(),
+                request.quantity(),
+                request.costValue(),
+                request.placePurchase(),
+                request.createdBy()
+        );
+
+        Asset assetEntity = assetRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Equipamento não encontrado")
         );
 
-        assetUpdateConverter.assetUpdate(assetDTO, assetEdit);
+        Asset editAsset = assetUpdateConverter.doUpdate(data, assetEntity);
 
-        return assetConverter.assetDTO(assetRepository.save(assetEdit));
+        return assetConverter.toResponse(assetRepository.save(editAsset));
 
     }
 }
