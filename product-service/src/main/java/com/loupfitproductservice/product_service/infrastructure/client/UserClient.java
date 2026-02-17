@@ -1,6 +1,6 @@
 package com.loupfitproductservice.product_service.infrastructure.client;
 
-import com.loupfitproductservice.product_service.business.dto.UserDTO;
+import com.loupfitproductservice.product_service.business.record.user.out.UserResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -10,5 +10,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface UserClient {
 
     @GetMapping("/users/search")
-    UserDTO getUserByUsername(@RequestHeader("Authorization") String token, @RequestParam("username") String username);
+    UserResponse getUserByUsername(@RequestHeader("Authorization") String token, @RequestParam("username") String username);
 }
