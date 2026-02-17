@@ -65,7 +65,7 @@ public class SupplierService {
 
         try {
 
-            boolean exist = supplierRepository.existsBySupplierName(username);
+            boolean exist = supplierRepository.existsByName(username);
 
             if (exist) {
                 throw new ConflictException("Fornecedor já cadastrado " + username);
@@ -93,7 +93,7 @@ public class SupplierService {
         try {
 
             return supplierConverter.toResponseList(
-                    supplierRepository.findBySupplierNameContainsIgnoreCase(name)
+                    supplierRepository.findByNameContainsIgnoreCase(name)
             );
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
