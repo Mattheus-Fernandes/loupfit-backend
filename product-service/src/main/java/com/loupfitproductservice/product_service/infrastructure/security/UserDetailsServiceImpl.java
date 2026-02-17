@@ -4,6 +4,7 @@ package com.loupfitproductservice.product_service.infrastructure.security;
 import com.loupfitproductservice.product_service.business.record.user.out.UserResponse;
 import com.loupfitproductservice.product_service.infrastructure.client.UserClient;
 import com.loupfitproductservice.product_service.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfitproductservice.product_service.infrastructure.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +27,7 @@ public class UserDetailsServiceImpl {
                     .roles(user.role().name())
                     .build();
         } catch (UsernameNotFoundException e) {
-            throw new ConflictExcpetion("Usuário não encontrado");
+            throw new ResourceNotFoundException("Usuário não encontrado");
         }
     }
 }

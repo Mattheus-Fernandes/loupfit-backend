@@ -1,5 +1,6 @@
 package com.loupfitproductservice.product_service.infrastructure.handler;
 
+import com.loupfitproductservice.product_service.business.record.ApiError;
 import com.loupfitproductservice.product_service.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfitproductservice.product_service.infrastructure.exceptions.ForbiddenException;
 import com.loupfitproductservice.product_service.infrastructure.exceptions.ResourceNotFoundException;
@@ -14,23 +15,30 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalHandlerException {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handlerResourceNotFoundException(ResourceNotFoundException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<ApiError> handlerResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ApiError(ex.getMessage(), HttpStatus.NOT_FOUND.value()));
     }
 
     @ExceptionHandler(ConflictExcpetion.class)
-    public ResponseEntity<String> handlerConflictException(ConflictExcpetion ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    public ResponseEntity<ApiError> handlerConflictException(ConflictExcpetion ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiError(ex.getMessage(), HttpStatus.CONFLICT.value()));
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<String> handlerForbiddenException(ForbiddenException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+    public ResponseEntity<ApiError> handlerForbiddenException(ForbiddenException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiError(ex.getMessage(), HttpStatus.FORBIDDEN.value()));
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<String> handlerUnauthorizedException(UnauthorizedException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<ApiError> handlerUnauthorizedException(UnauthorizedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiError(ex.getMessage(), HttpStatus.UNAUTHORIZED.value()));
     }
-
 }
