@@ -14,10 +14,8 @@ public class Supplier {
 
     @Id
     private String id;
-    private String supplierName;
-    private String cnpj;
+    private String name;
     private String email;
     private String phone;
-    private String linkProfile;
     private boolean active;
 }
