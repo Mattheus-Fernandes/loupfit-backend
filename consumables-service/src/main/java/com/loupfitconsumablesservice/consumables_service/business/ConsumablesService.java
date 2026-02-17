@@ -12,6 +12,7 @@ import com.loupfitconsumablesservice.consumables_service.infrastructure.entity.C
 import com.loupfitconsumablesservice.consumables_service.infrastructure.enums.UserRole;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ConflictException;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ForbiddenException;
+import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.repository.ConsumablesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -56,9 +57,9 @@ public class ConsumablesService {
                 user.username()
         );
 
-        Consumables comsumable = consumablesConverter.toEntity(data);
+        Consumables consumable = consumablesConverter.toEntity(data);
 
-        return consumablesConverter.toResponse(consumablesRepository.save(comsumable));
+        return consumablesConverter.toResponse(consumablesRepository.save(consumable));
     }
 
     public List<ConsumableResponse> filterAllConsumables() {
@@ -72,7 +73,7 @@ public class ConsumablesService {
         hasPermission(user, "DELETE");
 
         Consumables consumableDelete = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Consumível não encontrado")
+                () -> new ResourceNotFoundException("Consumível não encontrado")
         );
 
         consumablesRepository.delete(consumableDelete);
@@ -97,7 +98,7 @@ public class ConsumablesService {
         );
 
         Consumables consumableEntity = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Consumível não encontrado")
+                () -> new ResourceNotFoundException("Consumível não encontrado")
         );
 
         Consumables consumableEdit = consumablesUpdateConverter.doUpdate(data, consumableEntity);
@@ -113,7 +114,7 @@ public class ConsumablesService {
         hasPermission(user, "PATCH");
 
         Consumables consumable = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Consumível não encontrado")
+                () -> new ResourceNotFoundException("Consumível não encontrado")
         );
 
         if ("DECREASE".equalsIgnoreCase(request.operation())) {
