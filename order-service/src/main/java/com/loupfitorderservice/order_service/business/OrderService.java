@@ -7,11 +7,12 @@ import com.loupfitorderservice.order_service.business.record.product.in.ProductU
 import com.loupfitorderservice.order_service.business.record.product.out.ProductResponse;
 import com.loupfitorderservice.order_service.business.record.user.out.UserResponse;
 import com.loupfitorderservice.order_service.infrastructure.entity.Order;
-import com.loupfitorderservice.order_service.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfitorderservice.order_service.infrastructure.exceptions.ConflictException;
 import com.loupfitorderservice.order_service.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfitorderservice.order_service.infrastructure.repository.OrderRepository;
 import com.loupfitorderservice.order_service.infrastructure.security.client.UserClient;
 import com.loupfitorderservice.order_service.infrastructure.security.product.ProductClient;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,15 +49,19 @@ public class OrderService {
     public OrderResponse processSale(String token, OrderRequest request) {
 
         UserResponse user = userAuthenticated(token);
+        ProductResponse product;
 
-        ProductResponse product = productClient.getProductById(token, request.productId());
+        try {
 
-        if (product == null) {
+           product = productClient.getProductById(token, request.productId());
+
+        } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException("Produto não encontrado");
         }
 
+
         if (product.stock() < request.quantity()) {
-            throw new ConflictExcpetion("A venda não pode ser maior do que o estoque");
+            throw new ConflictException("A venda não pode ser maior do que o estoque");
         }
 
         OrderRequest data = new OrderRequest(
@@ -94,7 +99,7 @@ public class OrderService {
             return orderConverter.toResponseList(
                     orderRepository.findAll()
             );
-        } catch (ConflictExcpetion e) {
+        } catch (ConflictException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
     }
