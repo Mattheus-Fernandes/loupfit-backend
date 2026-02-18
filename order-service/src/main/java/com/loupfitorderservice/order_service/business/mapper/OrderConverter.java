@@ -1,6 +1,7 @@
 package com.loupfitorderservice.order_service.business.mapper;
 
-import com.loupfitorderservice.order_service.business.dto.OrderDTO;
+import com.loupfitorderservice.order_service.business.record.order.in.OrderRequest;
+import com.loupfitorderservice.order_service.business.record.order.out.OrderResponse;
 import com.loupfitorderservice.order_service.infrastructure.entity.Order;
 import org.mapstruct.Mapper;
 
@@ -9,9 +10,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface OrderConverter {
 
-    Order orderEntity(OrderDTO dto);
+    Order toEntity(OrderRequest request);
 
-    OrderDTO orderDTO(Order entity);
+    OrderResponse toResponse(Order entity);
 
-    List<OrderDTO> ordersListDTO(List<Order> entitiesList);
+    List<OrderResponse> toResponseList(List<Order> entities);
 }

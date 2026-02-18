@@ -1,10 +1,11 @@
 package com.loupfitorderservice.order_service.business;
 
-import com.loupfitorderservice.order_service.business.dto.OrderDTO;
-import com.loupfitorderservice.order_service.business.dto.product.ProductDTO;
-import com.loupfitorderservice.order_service.business.dto.product.ProductUpdateStockSalesDTO;
-import com.loupfitorderservice.order_service.business.dto.user.UserDTO;
+import com.loupfitorderservice.order_service.business.record.order.in.OrderRequest;
+import com.loupfitorderservice.order_service.business.record.order.out.OrderResponse;
 import com.loupfitorderservice.order_service.business.mapper.OrderConverter;
+import com.loupfitorderservice.order_service.business.record.product.in.ProductUpdateStockSalesRequest;
+import com.loupfitorderservice.order_service.business.record.product.out.ProductResponse;
+import com.loupfitorderservice.order_service.business.record.user.out.UserResponse;
 import com.loupfitorderservice.order_service.infrastructure.entity.Order;
 import com.loupfitorderservice.order_service.infrastructure.exceptions.ConflictExcpetion;
 import com.loupfitorderservice.order_service.infrastructure.exceptions.ResourceNotFoundException;
@@ -29,64 +30,68 @@ public class OrderService {
     private final OrderConverter orderConverter;
     private final OrderRepository orderRepository;
 
-    private UserDTO userAuthenticated(String token) {
+    private UserResponse userAuthenticated(String token) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        UserDTO user = userClient.getUserByUsername(token, username);
+        UserResponse user = userClient.getUserByUsername(token, username);
 
-        if (user != null && user.getUsername() != null) {
-            return new UserDTO(user.getUsername(), user.getRole());
+        if (user != null && user.username() != null) {
+            return new UserResponse(user.username(), user.role());
         }
 
         throw new ResourceNotFoundException("Usuário(a) não encontrado(a) " + username);
 
     }
 
-    public OrderDTO processSale(String token, OrderDTO dto) {
+    public OrderResponse processSale(String token, OrderRequest request) {
 
-        UserDTO user = userAuthenticated(token);
-        dto.setSoldBy(user.getUsername());
+        UserResponse user = userAuthenticated(token);
 
-        ProductDTO product = productClient.getProductById(token, dto.getProductId());
+        ProductResponse product = productClient.getProductById(token, request.productId());
 
         if (product == null) {
             throw new ResourceNotFoundException("Produto não encontrado");
         }
 
-        if (product.getStock() < dto.getQuantity()) {
-            throw new ConflictExcpetion("A venda nao pode ser maior do que o estoque");
+        if (product.stock() < request.quantity()) {
+            throw new ConflictExcpetion("A venda não pode ser maior do que o estoque");
         }
 
+        OrderRequest data = new OrderRequest(
+                "#" + UUID.randomUUID().toString(),
+                product.id(),
+                product.name(),
+                product.imageUrl(),
+                request.quantity(),
+                product.price().multiply(BigDecimal.valueOf(request.quantity())),
+                product.size(),
+                product.color(),
+                user.username(),
+                request.paymentMethod()
+        );
+
+        Order order = orderConverter.toEntity(data);
+
         // Update Stock
-        productClient.updateInventory(token, product.getId(),
-                new ProductUpdateStockSalesDTO(dto.getQuantity(), "decrease", "STOCK")
+        productClient.updateInventory(token, product.id(),
+                new ProductUpdateStockSalesRequest(request.quantity(), "decrease", "STOCK")
         );
 
         // Update Sale
-        productClient.updateInventory(token, product.getId(),
-                new ProductUpdateStockSalesDTO(dto.getQuantity(), "increase", "SALES")
+        productClient.updateInventory(token, product.id(),
+                new ProductUpdateStockSalesRequest(request.quantity(), "increase", "SALES")
         );
 
-        dto.setOrderId("#" + UUID.randomUUID().toString());
-        dto.setProductId(product.getId());
-        dto.setProductName(product.getName());
-        dto.setImageUrl(product.getImageUrl());
-        dto.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
-        dto.setColor(product.getColor());
-        dto.setSize(product.getSize());
-
-        Order newOrder = orderConverter.orderEntity(dto);
-
-        return orderConverter.orderDTO(orderRepository.save(newOrder));
+        return orderConverter.toResponse(orderRepository.save(order));
 
     }
 
-    public List<OrderDTO> filterAllSales() {
+    public List<OrderResponse> filterAllSales() {
 
         try {
-            return orderConverter.ordersListDTO(
+            return orderConverter.toResponseList(
                     orderRepository.findAll()
             );
         } catch (ConflictExcpetion e) {
@@ -94,7 +99,7 @@ public class OrderService {
         }
     }
 
-    public OrderDTO removeSale(String id) {
+    public OrderResponse removeSale(String id) {
 
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Registro de venda não encontrada")
@@ -102,6 +107,6 @@ public class OrderService {
 
         orderRepository.deleteById(id);
 
-        return orderConverter.orderDTO(order);
+        return orderConverter.toResponse(order);
     }
 }
