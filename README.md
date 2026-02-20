@@ -173,12 +173,11 @@ Trata-se de um projeto com necessidade real de uma loja local e eu aproveitei o 
 
 ## 📈 Próximos Passos (Roadmap)
 
-* Configuração de CORS
 * Implementação de CI/CD com GitHub Actions
 * Deploy em VPS
-* Configuração de Nginx como reverse proxy
+* Configuração de Nginx com reverse proxy
 * HTTPS
-* Documentação da API com Swagger
+* Documentação completa da API com Swagger
 
 ## 👤 Autor
 
