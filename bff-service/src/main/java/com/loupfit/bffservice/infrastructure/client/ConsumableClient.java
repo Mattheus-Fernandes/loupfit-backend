@@ -1,7 +1,8 @@
 package com.loupfit.bffservice.infrastructure.client;
 
-import com.loupfit.bffservice.business.dto.in.ConsumablesQuantityDTO;
-import com.loupfit.bffservice.business.dto.out.ConsumablesDTO;
+import com.loupfit.bffservice.business.record.consumable.in.ConsumableQuantityRequest;
+import com.loupfit.bffservice.business.record.consumable.in.ConsumableRequest;
+import com.loupfit.bffservice.business.record.consumable.out.ConsumableResponse;
 import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -13,25 +14,25 @@ import java.util.List;
 public interface ConsumableClient {
 
     @PostMapping("/consumables")
-    ConsumablesDTO saveConsumables(@RequestHeader("Authorization") String token, @RequestBody ConsumablesDTO consumablesDTO);
+    ConsumableResponse saveConsumables(@RequestHeader("Authorization") String token, @RequestBody ConsumableRequest request);
 
     @GetMapping("/consumables")
-    List<ConsumablesDTO> findAllConsumables(@RequestHeader("Authorization") String token);
+    List<ConsumableResponse> findAllConsumables(@RequestHeader("Authorization") String token);
 
     @DeleteMapping("/consumables/{id}")
-    ConsumablesDTO deleteConsumables(@RequestHeader("Authorization") String token, @PathVariable String id);
+    ConsumableResponse deleteConsumables(@RequestHeader("Authorization") String token, @PathVariable String id);
 
     @PutMapping("/consumables/{id}")
-    ConsumablesDTO updateConsumables(
+    ConsumableResponse updateConsumables(
             @RequestHeader("Authorization") String token,
-            @RequestBody ConsumablesDTO consumablesDTO,
+            @RequestBody ConsumableRequest request,
             @PathVariable String id
     );
 
     @PatchMapping("/consumables/{id}/quantity")
-    ConsumablesDTO updateConsumablesQuantity(
+    ConsumableResponse updateConsumablesQuantity(
             @RequestHeader("Authorization") String token,
-            @RequestBody ConsumablesQuantityDTO consumablesQuantityDTO,
+            @RequestBody ConsumableQuantityRequest request,
             @PathVariable String id
     );
 }

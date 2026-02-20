@@ -1,6 +1,7 @@
 package com.loupfit.bffservice.infrastructure.client;
 
-import com.loupfit.bffservice.business.dto.out.OrderDTO;
+import com.loupfit.bffservice.business.record.order.in.OrderRequest;
+import com.loupfit.bffservice.business.record.order.out.OrderResponse;
 import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -11,14 +12,14 @@ import java.util.List;
 public interface OrderClient {
 
     @PostMapping("/orders")
-    OrderDTO saveOrder(
+    OrderResponse saveOrder(
             @RequestHeader("Authorization") String token,
-            @RequestBody OrderDTO dto
+            @RequestBody OrderRequest request
     );
 
     @GetMapping("/orders")
-    List<OrderDTO> findAllSales(@RequestHeader("Authorization") String token);
+    List<OrderResponse> findAllSales(@RequestHeader("Authorization") String token);
 
     @DeleteMapping("/orders/{id}")
-    OrderDTO deleteSale(@RequestHeader("Authorization") String token, @PathVariable String id);
+    OrderResponse deleteSale(@RequestHeader("Authorization") String token, @PathVariable String id);
 }

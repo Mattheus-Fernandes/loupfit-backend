@@ -1,6 +1,7 @@
 package com.loupfit.bffservice.infrastructure.client;
 
-import com.loupfit.bffservice.business.dto.out.AssetDTO;
+import com.loupfit.bffservice.business.record.asset.out.AssetResponse;
+import com.loupfit.bffservice.business.record.asset.in.AssetRequest;
 import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -12,21 +13,21 @@ public interface AssetClient {
 
 
     @PostMapping("/assets")
-    AssetDTO saveAsset(@RequestHeader("Authorization") String token, @RequestBody AssetDTO assetDTO);
+    AssetResponse saveAsset(@RequestHeader("Authorization") String token, @RequestBody AssetRequest request);
 
     @GetMapping("/assets")
-    List<AssetDTO> findAllAssets(@RequestHeader("Authorization") String token);
+    List<AssetResponse> findAllAssets(@RequestHeader("Authorization") String token);
 
     @GetMapping("/assets/by-username")
-    List<AssetDTO> findAssetByUsername(@RequestHeader("Authorization") String token, @RequestParam String username);
+    List<AssetResponse> findAssetByUsername(@RequestHeader("Authorization") String token, @RequestParam String username);
 
     @DeleteMapping("/assets/{id}")
-    AssetDTO deleteAsset(@RequestHeader("Authorization") String token, @PathVariable String id);
+    AssetResponse deleteAsset(@RequestHeader("Authorization") String token, @PathVariable String id);
 
     @PutMapping("/assets/{id}")
-    AssetDTO updateAsset(
+    AssetResponse updateAsset(
             @RequestHeader("Authorization") String token,
             @PathVariable String id,
-            @RequestBody AssetDTO assetDTO
+            @RequestBody AssetRequest request
     );
 }

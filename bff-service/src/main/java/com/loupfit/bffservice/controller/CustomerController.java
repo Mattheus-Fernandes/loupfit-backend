@@ -1,8 +1,8 @@
 package com.loupfit.bffservice.controller;
 
 import com.loupfit.bffservice.business.CustomerService;
-import com.loupfit.bffservice.business.dto.out.CustomerDTO;
-import com.loupfit.bffservice.business.dto.in.CustomerReqDTO;
+import com.loupfit.bffservice.business.record.customer.in.CustomerRequest;
+import com.loupfit.bffservice.business.record.customer.out.CustomerResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/customers")
 @RequiredArgsConstructor
 @Tag(name = "Customer", description = "Registers and searches of customers")
 public class CustomerController {
@@ -25,9 +25,9 @@ public class CustomerController {
     @ApiResponse(responseCode = "201", description = "Customer saved success")
     @ApiResponse(responseCode = "409", description = "Customer already registered")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<CustomerDTO> saveCustomer(
-            @RequestBody CustomerReqDTO dto) {
-        return ResponseEntity.ok(customerService.addCustomer(dto));
+    public ResponseEntity<CustomerResponse> saveCustomer(
+            @RequestBody CustomerRequest request) {
+        return ResponseEntity.ok(customerService.addCustomer(request));
     }
 
     @GetMapping
@@ -35,7 +35,7 @@ public class CustomerController {
     @ApiResponse(responseCode = "200", description = "Customer found")
     @ApiResponse(responseCode = "404", description = "Customer not found")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<List<CustomerDTO>> findAllCustomers(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<CustomerResponse>> findAllCustomers(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(customerService.filterAllCustomers(token));
     }
 
@@ -44,7 +44,7 @@ public class CustomerController {
     @ApiResponse(responseCode = "200", description = "Customer found")
     @ApiResponse(responseCode = "404", description = "Customer not found")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<CustomerDTO> findByCurrentUser(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<CustomerResponse> findByCurrentUser(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(customerService.filterCurrentUser(token));
     }
 
@@ -53,11 +53,11 @@ public class CustomerController {
     @ApiResponse(responseCode = "200", description = "Customer updated successfully")
     @ApiResponse(responseCode = "409", description = "Customer already updated")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<CustomerDTO> updateCustomer(
+    public ResponseEntity<CustomerResponse> updateCustomer(
             @RequestHeader("Authorization") String token,
-            @RequestBody CustomerReqDTO dto
+            @RequestBody CustomerRequest request
     ) {
-        return ResponseEntity.ok(customerService.editCustomer(token, dto));
+        return ResponseEntity.ok(customerService.editCustomer(token, request));
     }
 
     @DeleteMapping("/{id}")
@@ -65,7 +65,7 @@ public class CustomerController {
     @ApiResponse(responseCode = "200", description = "Customer updated successfully")
     @ApiResponse(responseCode = "404", description = "Customer already removed")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<CustomerDTO> deleteCustomer(
+    public ResponseEntity<CustomerResponse> deleteCustomer(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id
     ) {

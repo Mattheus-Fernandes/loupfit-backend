@@ -1,11 +1,11 @@
 package com.loupfit.bffservice.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loupfit.bffservice.business.ProductService;
-import com.loupfit.bffservice.business.dto.in.ProductUpdateJsonDTO;
-import com.loupfit.bffservice.business.dto.in.ProductUpdatePriceDTO;
-import com.loupfit.bffservice.business.dto.in.ProductUpdateStockSalesDTO;
-import com.loupfit.bffservice.business.dto.out.ProductDTO;
+import com.loupfit.bffservice.business.record.product.in.ProductRequest;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdatePriceRequest;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdateRequest;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdateStockSalesRequest;
+import com.loupfit.bffservice.business.record.product.out.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,17 +22,17 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ProductDTO> saveProduct(
+    public ResponseEntity<ProductResponse> saveProduct(
             @RequestHeader("Authorization") String token,
-            @RequestPart("product") ProductDTO dto,
+            @RequestPart("product") ProductRequest request,
             @RequestPart("file") MultipartFile file
     ) {
 
-        return ResponseEntity.ok(productService.addProduct(token, dto, file));
+        return ResponseEntity.ok(productService.addProduct(token, request, file));
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductDTO>> findProducts(
+    public ResponseEntity<List<ProductResponse>> findProducts(
             @RequestHeader("Authorization") String token,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
@@ -44,49 +44,49 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> findProductById( @RequestHeader("Authorization") String token, @PathVariable Long id) {
+    public ResponseEntity<ProductResponse> findProductById( @RequestHeader("Authorization") String token, @PathVariable Long id) {
         return ResponseEntity.ok(productService.filterProductById(token, id));
     }
 
     @GetMapping("/low-stock")
-    public ResponseEntity<List<ProductDTO>> findProductsLowStock( @RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<ProductResponse>> findProductsLowStock( @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(productService.filterProductLowStock(token));
     }
 
     @GetMapping("/best-sellers")
-    public ResponseEntity<List<ProductDTO>> findProductsBestSellers( @RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<ProductResponse>> findProductsBestSellers( @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(productService.filterProductBestSellers(token));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ProductDTO> editProduct(
+    public ResponseEntity<ProductResponse> editProduct(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody ProductUpdateJsonDTO dto
+            @RequestBody ProductUpdateRequest request
     ) {
-        return ResponseEntity.ok(productService.updateProduct(token, id, dto));
+        return ResponseEntity.ok(productService.updateProduct(token, id, request));
     }
 
     @PatchMapping("/{id}/inventory")
-    public ResponseEntity<ProductDTO> editProductStockSale(
+    public ResponseEntity<ProductResponse> editProductStockSale(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody ProductUpdateStockSalesDTO dto
+            @RequestBody ProductUpdateStockSalesRequest request
     ) {
-        return ResponseEntity.ok(productService.updateStockAndSalesProduct(token, id, dto));
+        return ResponseEntity.ok(productService.updateStockAndSalesProduct(token, id, request));
     }
 
     @PatchMapping("/{id}/price")
-    public ResponseEntity<ProductDTO> editProductPrice(
+    public ResponseEntity<ProductResponse> editProductPrice(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody ProductUpdatePriceDTO price
+            @RequestBody ProductUpdatePriceRequest request
     ) {
-        return ResponseEntity.ok(productService.updatePriceProduct(token, id, price));
+        return ResponseEntity.ok(productService.updatePriceProduct(token, id, request));
     }
 
     @PatchMapping(value = "/{id}/image", consumes = "multipart/form-data")
-    public ResponseEntity<ProductDTO> editProductImage(
+    public ResponseEntity<ProductResponse> editProductImage(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
             @RequestPart("file") MultipartFile file
@@ -95,7 +95,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ProductDTO> deleteProduct(
+    public ResponseEntity<ProductResponse> deleteProduct(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id
     ) {

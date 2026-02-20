@@ -1,9 +1,9 @@
 package com.loupfit.bffservice.infrastructure.client;
 
-import com.loupfit.bffservice.business.dto.out.UserDTO;
-import com.loupfit.bffservice.business.dto.in.UserReqDTO;
-import com.loupfit.bffservice.business.dto.in.UserRoleDTO;
-import com.loupfit.bffservice.business.dto.in.UsernameReqDTO;
+import com.loupfit.bffservice.business.record.user.in.UserRequest;
+import com.loupfit.bffservice.business.record.user.in.UserRoleRequest;
+import com.loupfit.bffservice.business.record.user.in.UsernameRequest;
+import com.loupfit.bffservice.business.record.user.out.UserResponse;
 import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -13,35 +13,35 @@ import java.util.List;
 @FeignClient(name = "user-service-one", url = "${user.url}", configuration = FeignConfig.class)
 public interface UserClient {
 
-    @GetMapping("/user/search")
-    UserDTO getUserByUsername(@RequestHeader("Authorization") String token, @RequestParam("username") String username);
+    @GetMapping("/users/search")
+    UserResponse getUserByUsername(@RequestHeader("Authorization") String token, @RequestParam("username") String username);
 
-    @PostMapping("/user")
-    UserDTO saveUser(@RequestBody UserReqDTO newUser);
+    @PostMapping("/users")
+    UserResponse saveUser(@RequestBody UserRequest request);
 
-    @GetMapping("/user")
-    List<UserDTO> findUser(@RequestHeader("Authorization") String token);
+    @GetMapping("/users")
+    List<UserResponse> findUser(@RequestHeader("Authorization") String token);
 
-    @DeleteMapping("/user/{id}")
-    UserDTO deleteUser(@RequestHeader("Authorization") String token, @PathVariable Long id);
+    @DeleteMapping("/users/{id}")
+    UserResponse deleteUser(@RequestHeader("Authorization") String token, @PathVariable Long id);
 
-    @PutMapping("/user/{id}")
-    UserDTO updateUser(
+    @PutMapping("/users/{id}")
+    UserResponse updateUser(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody UserReqDTO userEditDTO
+            @RequestBody UserRequest request
     );
 
-    @PatchMapping("/user/{id}/role")
-    UserDTO updateRoleUser(
+    @PatchMapping("/users/{id}/role")
+    UserResponse updateRoleUser(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody UserRoleDTO dto
+            @RequestBody UserRoleRequest request
     );
 
-    @PatchMapping("/user/{id}/username")
-    UserDTO updateUsernameUser(
+    @PatchMapping("/users/{id}/username")
+    UserResponse updateUsernameUser(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody UsernameReqDTO dto);
+            @RequestBody UsernameRequest request);
 }

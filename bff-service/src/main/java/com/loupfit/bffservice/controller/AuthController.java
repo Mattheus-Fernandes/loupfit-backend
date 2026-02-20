@@ -1,7 +1,7 @@
 package com.loupfit.bffservice.controller;
 
 import com.loupfit.bffservice.business.AuthService;
-import com.loupfit.bffservice.business.dto.in.LoginReqDTO;
+import com.loupfit.bffservice.business.record.LoginRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,8 +23,8 @@ public class AuthController {
     @ApiResponse(responseCode = "404", description = "User not found")
     @ApiResponse(responseCode = "500", description = "Error server")
     public String doLogin(
-            @RequestBody LoginReqDTO dto
+            @RequestBody LoginRequest request
     ) {
-        return authService.doLogin(dto);
+        return authService.doLogin(request);
     }
 }

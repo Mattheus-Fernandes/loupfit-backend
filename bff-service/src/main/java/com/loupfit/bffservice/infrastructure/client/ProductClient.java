@@ -1,9 +1,9 @@
 package com.loupfit.bffservice.infrastructure.client;
 
-import com.loupfit.bffservice.business.dto.in.ProductUpdateJsonDTO;
-import com.loupfit.bffservice.business.dto.in.ProductUpdatePriceDTO;
-import com.loupfit.bffservice.business.dto.in.ProductUpdateStockSalesDTO;
-import com.loupfit.bffservice.business.dto.out.ProductDTO;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdatePriceRequest;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdateRequest;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdateStockSalesRequest;
+import com.loupfit.bffservice.business.record.product.out.ProductResponse;
 import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -16,14 +16,14 @@ import java.util.List;
 public interface ProductClient {
 
     @PostMapping(value = "/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ProductDTO saveProduct(
+    ProductResponse saveProduct(
             @RequestHeader("Authorization") String token,
             @RequestPart("product") String productJson,
             @RequestPart("file") MultipartFile file
     );
 
     @GetMapping("/products")
-    List<ProductDTO> findProducts(
+    List<ProductResponse> findProducts(
             @RequestHeader("Authorization") String token,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
@@ -32,46 +32,46 @@ public interface ProductClient {
     );
 
     @GetMapping("/products/{id}")
-    ProductDTO findProductById(@RequestHeader("Authorization") String token, @PathVariable Long id);
+    ProductResponse findProductById(@RequestHeader("Authorization") String token, @PathVariable Long id);
 
     @GetMapping("/products/low-stock")
-    List<ProductDTO> findProductsLowStock(@RequestHeader("Authorization") String token);
+    List<ProductResponse> findProductsLowStock(@RequestHeader("Authorization") String token);
 
     @GetMapping("/products/best-sellers")
-    List<ProductDTO> findProductsBestSellers(@RequestHeader("Authorization") String token);
+    List<ProductResponse> findProductsBestSellers(@RequestHeader("Authorization") String token);
 
     @PatchMapping("/products/{id}")
-    ProductDTO editProduct(
+    ProductResponse editProduct(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody ProductUpdateJsonDTO dto
+            @RequestBody ProductUpdateRequest request
     );
 
     @PatchMapping("/products/{id}/inventory")
-    ProductDTO editProductStockSale(
+    ProductResponse editProductStockSale(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody ProductUpdateStockSalesDTO dto
+            @RequestBody ProductUpdateStockSalesRequest request
     );
 
 
     @PatchMapping("/products/{id}/price")
-    ProductDTO editProductPrice(
+    ProductResponse editProductPrice(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody ProductUpdatePriceDTO price
+            @RequestBody ProductUpdatePriceRequest request
     );
 
 
     @PatchMapping(value = "/products/{id}/image", consumes = "multipart/form-data")
-    ProductDTO editProductImage(
+    ProductResponse editProductImage(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
             @RequestPart("file") MultipartFile file
     );
 
     @DeleteMapping("/products/{id}")
-    ProductDTO deleteProduct(
+    ProductResponse deleteProduct(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id
     );
