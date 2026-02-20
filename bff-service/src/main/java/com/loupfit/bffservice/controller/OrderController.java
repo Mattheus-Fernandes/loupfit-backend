@@ -1,7 +1,8 @@
 package com.loupfit.bffservice.controller;
 
 import com.loupfit.bffservice.business.OrderService;
-import com.loupfit.bffservice.business.dto.out.OrderDTO;
+import com.loupfit.bffservice.business.record.order.in.OrderRequest;
+import com.loupfit.bffservice.business.record.order.out.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,20 +17,20 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<OrderDTO> saveOrder(
+    public ResponseEntity<OrderResponse> saveOrder(
             @RequestHeader("Authorization") String token,
-            @RequestBody OrderDTO dto
+            @RequestBody OrderRequest request
     ) {
-        return ResponseEntity.ok(orderService.processSale(token, dto));
+        return ResponseEntity.ok(orderService.processSale(token, request));
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderDTO>> findAllSales(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<OrderResponse>> findAllSales(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(orderService.filterAllSales(token));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<OrderDTO> deleteSale(
+    public ResponseEntity<OrderResponse> deleteSale(
             @RequestHeader("Authorization") String token,
             @PathVariable String id
     ) {

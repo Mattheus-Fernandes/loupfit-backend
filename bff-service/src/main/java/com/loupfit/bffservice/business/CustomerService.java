@@ -1,7 +1,7 @@
 package com.loupfit.bffservice.business;
 
-import com.loupfit.bffservice.business.dto.out.CustomerDTO;
-import com.loupfit.bffservice.business.dto.in.CustomerReqDTO;
+import com.loupfit.bffservice.business.record.customer.in.CustomerRequest;
+import com.loupfit.bffservice.business.record.customer.out.CustomerResponse;
 import com.loupfit.bffservice.infrastructure.client.CustomerClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,24 +15,23 @@ public class CustomerService {
 
     private final CustomerClient customerClient;
 
-    public CustomerDTO addCustomer(@RequestBody CustomerReqDTO dto) {
-        return customerClient.saveCustomer(dto);
-
+    public CustomerResponse addCustomer(@RequestBody CustomerRequest request) {
+        return customerClient.saveCustomer(request);
     }
 
-    public List<CustomerDTO> filterAllCustomers(String token) {
+    public List<CustomerResponse> filterAllCustomers(String token) {
         return customerClient.findAllCustomers(token);
     }
 
-    public CustomerDTO filterCurrentUser(String token) {
+    public CustomerResponse filterCurrentUser(String token) {
        return customerClient.findByCurrentUser(token);
     }
 
-    public CustomerDTO editCustomer(String token, CustomerReqDTO dto) {
-        return customerClient.updateCustomer(token, dto);
+    public CustomerResponse editCustomer(String token, CustomerRequest request) {
+        return customerClient.updateCustomer(token, request);
     }
 
-    public CustomerDTO removeCustomer(String token, Long id) {
+    public CustomerResponse removeCustomer(String token, Long id) {
         return customerClient.deleteCustomer(token, id);
     }
 }

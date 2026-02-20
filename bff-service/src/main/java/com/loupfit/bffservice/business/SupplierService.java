@@ -1,7 +1,8 @@
 package com.loupfit.bffservice.business;
 
-import com.loupfit.bffservice.business.dto.in.SupplierActiveDTO;
-import com.loupfit.bffservice.business.dto.out.SupplierDTO;
+import com.loupfit.bffservice.business.record.supplier.in.SupplierActiveRequest;
+import com.loupfit.bffservice.business.record.supplier.in.SupplierRequest;
+import com.loupfit.bffservice.business.record.supplier.out.SupplierResponse;
 import com.loupfit.bffservice.infrastructure.client.SupplierClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,23 +15,23 @@ public class SupplierService {
 
     private final SupplierClient supplierClient;
 
-    public SupplierDTO addSupplier(String token, SupplierDTO dto) {
-        return supplierClient.saveSupplier(token, dto);
+    public SupplierResponse addSupplier(String token, SupplierRequest request) {
+        return supplierClient.saveSupplier(token, request);
     }
 
-    public List<SupplierDTO> findSupplier(String token, String name) {
+    public List<SupplierResponse> findSupplier(String token, String name) {
         return supplierClient.findSupplier(token, name);
     }
 
-    public SupplierDTO removeSupplier(String token, String id) {
+    public SupplierResponse removeSupplier(String token, String id) {
         return supplierClient.deleteSupplier(token, id);
     }
 
-    public SupplierDTO updateSupplier(String token, String id, SupplierDTO dto) {
-        return supplierClient.editSupplier(token, id, dto);
+    public SupplierResponse updateSupplier(String token, String id, SupplierRequest request) {
+        return supplierClient.editSupplier(token, id, request);
     }
 
-    public SupplierDTO updateActiveSupplier(String token, String id, SupplierActiveDTO dto) {
-       return supplierClient.editActiveSupplier(token, id, dto);
+    public SupplierResponse updateActiveSupplier(String token, String id, SupplierActiveRequest request) {
+       return supplierClient.editActiveSupplier(token, id, request);
     }
 }

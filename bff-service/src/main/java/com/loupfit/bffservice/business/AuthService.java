@@ -1,6 +1,6 @@
 package com.loupfit.bffservice.business;
 
-import com.loupfit.bffservice.business.dto.in.LoginReqDTO;
+import com.loupfit.bffservice.business.record.LoginRequest;
 import com.loupfit.bffservice.business.record.error.ApiError;
 import com.loupfit.bffservice.infrastructure.client.AuthClient;
 import com.loupfit.bffservice.infrastructure.exceptions.ForbiddenException;
@@ -16,10 +16,10 @@ public class AuthService {
 
     private final AuthClient authClient;
 
-    public String doLogin(LoginReqDTO dto) {
+    public String doLogin(LoginRequest request) {
 
         try {
-            return authClient.doLogin(dto);
+            return authClient.doLogin(request);
         } catch (FeignException.Unauthorized e) {
             throw new UnauthorizedException(
                     new ApiError(
