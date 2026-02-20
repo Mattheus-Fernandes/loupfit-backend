@@ -1,11 +1,12 @@
 package com.loupfit_supplier_service.business;
 
-import com.loupfit_supplier_service.business.dto.AuthenticatedUser;
-import com.loupfit_supplier_service.business.dto.SupplierActiveDTO;
-import com.loupfit_supplier_service.business.dto.SupplierDTO;
-import com.loupfit_supplier_service.business.dto.UserDTO;
 import com.loupfit_supplier_service.business.mapper.SupplierConverter;
 import com.loupfit_supplier_service.business.mapper.SupplierUpdateConverter;
+import com.loupfit_supplier_service.business.record.supplier.in.SupplierActiveRequest;
+import com.loupfit_supplier_service.business.record.supplier.in.SupplierRequest;
+import com.loupfit_supplier_service.business.record.supplier.out.SupplierResponse;
+import com.loupfit_supplier_service.business.record.user.out.UserAuthenticatedResponse;
+import com.loupfit_supplier_service.business.record.user.out.UserResponse;
 import com.loupfit_supplier_service.infrastructure.client.UserClient;
 import com.loupfit_supplier_service.infrastructure.entity.Supplier;
 import com.loupfit_supplier_service.infrastructure.enums.UserRole;
@@ -30,35 +31,41 @@ public class SupplierService {
     private final UserClient userClient;
 
 
-    private AuthenticatedUser userAuthenticated(String token) {
+    private UserAuthenticatedResponse userAuthenticated(String token) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        UserDTO userDTO = userClient.getUserByUsername(token, username);
+        UserResponse user = userClient.getUserByUsername(token, username);
 
-        if (userDTO != null && userDTO.getUsername() != null) {
-            return new AuthenticatedUser(userDTO.getUsername(), userDTO.getRole());
+        if (user != null && user.username() != null) {
+            return new UserAuthenticatedResponse(user.username(), user.role());
         }
 
         throw new ResourceNotFoundException("Usuário(a) não encontrado(a) " + username);
     }
 
-    public SupplierDTO addSupplier(SupplierDTO dto) {
+    public SupplierResponse addSupplier(SupplierRequest request) {
 
-        existBySupplierName(dto.getSupplierName());
+        existBySupplierName(request.name());
 
-        Supplier entity = supplierConverter.supplierEntity(dto);
+        SupplierRequest data = new SupplierRequest(
+                request.name(),
+                request.email(),
+                request.phone(),
+                request.active()
+        );
 
-        return supplierConverter.supplierDTO(supplierRepository.save(entity));
+        Supplier supplier = supplierConverter.toEntity(data);
 
+        return supplierConverter.toResponse(supplierRepository.save(supplier));
     }
 
     public void existBySupplierName(String username) {
 
         try {
 
-            boolean exist = supplierRepository.existsBySupplierName(username);
+            boolean exist = supplierRepository.existsByName(username);
 
             if (exist) {
                 throw new ConflictException("Fornecedor já cadastrado " + username);
@@ -69,11 +76,11 @@ public class SupplierService {
         }
     }
 
-    public List<SupplierDTO> filterAllSupplies() {
+    public List<SupplierResponse> filterAllSupplies() {
 
         try {
 
-            return supplierConverter.supplierDTOList(
+            return supplierConverter.toResponseList(
                     supplierRepository.findAll()
             );
         } catch (ResourceNotFoundException e) {
@@ -81,27 +88,23 @@ public class SupplierService {
         }
     }
 
-    public List<SupplierDTO> filterBySupplierName(String name) {
+    public List<SupplierResponse> filterBySupplierName(String name) {
 
         try {
 
-            return supplierConverter.supplierDTOList(
-                    supplierRepository.findBySupplierNameContainsIgnoreCase(name)
+            return supplierConverter.toResponseList(
+                    supplierRepository.findByNameContainsIgnoreCase(name)
             );
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
-    public SupplierDTO removeSupplier(String token, String id) {
+    public SupplierResponse removeSupplier(String token, String id) {
 
-        AuthenticatedUser user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
-
-        if (!permitted) {
-            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para excluir fornecedor.");
-        }
+        hasPermission(user, "DELETE");
 
         Supplier entity = supplierRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Fornecedor não encontrado")
@@ -109,44 +112,53 @@ public class SupplierService {
 
         supplierRepository.deleteById(id);
 
-        return supplierConverter.supplierDTO(entity);
+        return supplierConverter.toResponse(entity);
     }
 
-    public SupplierDTO updateSupplier(String token, String id, SupplierDTO dto) {
+    public SupplierResponse updateSupplier(String token, String id, SupplierRequest request) {
 
-        AuthenticatedUser user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
+        hasPermission(user, "PUT");
 
-        if (!permitted) {
-            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar fornecedor.");
-        }
+        SupplierRequest data = new SupplierRequest(
+                request.name(),
+                request.email(),
+                request.phone(),
+                request.active()
+        );
 
-        Supplier entityEdit = supplierRepository.findById(id).orElseThrow(
+        Supplier entity = supplierRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Fornecedor não encontrado")
         );
 
-        supplierUpdateConverter.supplierUpdate(dto, entityEdit);
+        Supplier supplierEdit = supplierUpdateConverter.doUpdate(data, entity);
 
-        return supplierConverter.supplierDTO(supplierRepository.save(entityEdit));
+        return supplierConverter.toResponse(supplierRepository.save(supplierEdit));
     }
 
-    public SupplierDTO updateActiveSupplier(String token, String id, SupplierActiveDTO dto) {
-        AuthenticatedUser user = userAuthenticated(token);
+    public SupplierResponse updateActiveSupplier(String token, String id, SupplierActiveRequest request) {
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+        hasPermission(user, "PUT");
 
-        if (!permitted) {
-            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar fornecedor.");
-        }
-
-        Supplier entityEdit = supplierRepository.findById(id).orElseThrow(
+        Supplier entity = supplierRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Fornecedor não encontrado")
         );
 
-        entityEdit.setActive(dto.active);
+        entity.setActive(request.active());
 
-        return supplierConverter.supplierDTO(supplierRepository.save(entityEdit));
+        return supplierConverter.toResponse(supplierRepository.save(entity));
+    }
+
+    private void hasPermission(UserAuthenticatedResponse user, String method) {
+        boolean permitted = user.role() == UserRole.OWNER || user.role() == UserRole.ADMIN || user.role() == UserRole.EDITOR;
+
+        String methodType = "DELETE".equals(method) ? "excluir" : "editar";
+
+        if (!permitted) {
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para " + methodType + " consumíveis.");
+        }
     }
 
 }

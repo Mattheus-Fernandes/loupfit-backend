@@ -11,16 +11,16 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Builder
-@Document("consumable")
+@Document("consumables")
 public class Consumables {
 
     @Id
     private String id;
-    private String consumableName;
+    private String name;
     private String description;
     private BigDecimal costValue;
     private Integer quantity;
-    private String supplier;
+    private String placePurchase;
     private String purchaseLink;
-    private String createdby;
+    private String createdBy;
 }

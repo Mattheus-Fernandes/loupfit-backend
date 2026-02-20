@@ -1,15 +1,18 @@
 package com.loupfitconsumablesservice.consumables_service.business;
 
-import com.loupfitconsumablesservice.consumables_service.business.dto.AuthenticatedUserDTO;
-import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesDTO;
-import com.loupfitconsumablesservice.consumables_service.business.dto.ConsumablesQuantityDTO;
-import com.loupfitconsumablesservice.consumables_service.business.dto.UserDTO;
 import com.loupfitconsumablesservice.consumables_service.business.mapper.ComsumablesConverter;
 import com.loupfitconsumablesservice.consumables_service.business.mapper.ConsumablesUpdateConverter;
+import com.loupfitconsumablesservice.consumables_service.business.record.consumable.in.ConsumableQuantityRequest;
+import com.loupfitconsumablesservice.consumables_service.business.record.consumable.in.ConsumableRequest;
+import com.loupfitconsumablesservice.consumables_service.business.record.consumable.out.ConsumableResponse;
+import com.loupfitconsumablesservice.consumables_service.business.record.user.out.UserAuthenticatedResponse;
+import com.loupfitconsumablesservice.consumables_service.business.record.user.out.UserResponse;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.client.UserClient;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.entity.Consumables;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.enums.UserRole;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ConflictException;
+import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ForbiddenException;
+import com.loupfitconsumablesservice.consumables_service.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfitconsumablesservice.consumables_service.infrastructure.repository.ConsumablesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -27,100 +30,116 @@ public class ConsumablesService {
     private final ComsumablesConverter consumablesConverter;
     private final ConsumablesUpdateConverter consumablesUpdateConverter;
 
-    private AuthenticatedUserDTO userAuthenticated(String token) {
+    private UserAuthenticatedResponse userAuthenticated(String token) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        UserDTO userDTO = userClient.findUserByUsername(token, username);
+        UserResponse user = userClient.findUserByUsername(token, username);
 
-        if (userDTO != null && userDTO.getUsername() != null) {
-            return new AuthenticatedUserDTO(userDTO.getUsername(), userDTO.getRole());
+        if (user != null && user.username() != null) {
+            return new UserAuthenticatedResponse(user.username(), user.role());
         }
 
         throw new ConflictException("Usuário(a) não encontrado(a) " + username);
     }
 
-    public ConsumablesDTO addConsumable(String token, ConsumablesDTO consumablesDTO) {
+    public ConsumableResponse addConsumable(String token, ConsumableRequest request) {
 
-        AuthenticatedUserDTO user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        consumablesDTO.setCreatedby(user.getUsername());
+        ConsumableRequest data = new ConsumableRequest(
+                request.name(),
+                request.description(),
+                request.costValue(),
+                request.quantity(),
+                request.placePurchase(),
+                request.purchaseLink(),
+                user.username()
+        );
 
-        Consumables consumables = consumablesConverter.comsumablesEntity(consumablesDTO);
+        Consumables consumable = consumablesConverter.toEntity(data);
 
-        return consumablesConverter.consumablesDTO(consumablesRepository.save(consumables));
-
+        return consumablesConverter.toResponse(consumablesRepository.save(consumable));
     }
 
-    public List<ConsumablesDTO> filterAllConsumables() {
-        return consumablesConverter.consumablesDTOList(consumablesRepository.findAll());
+    public List<ConsumableResponse> filterAllConsumables() {
+        return consumablesConverter.toResponseList(consumablesRepository.findAll());
     }
 
-    public ConsumablesDTO removeConsumable(String token, String id) {
+    public ConsumableResponse removeConsumable(String token, String id) {
 
-        AuthenticatedUserDTO user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
-
-        if (!permitted) {
-            throw new ConflictException("OPSS! Você não tem PERMISSÃO para excluir consumíveis.");
-        }
+        hasPermission(user, "DELETE");
 
         Consumables consumableDelete = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Consumível não encontrado")
+                () -> new ResourceNotFoundException("Consumível não encontrado")
         );
 
         consumablesRepository.delete(consumableDelete);
 
-        return consumablesConverter.consumablesDTO(consumableDelete);
+        return consumablesConverter.toResponse(consumableDelete);
     }
 
-    public ConsumablesDTO editConsumable(String token, String id, ConsumablesDTO consumablesDTO) {
+    public ConsumableResponse editConsumable(String token, String id, ConsumableRequest request) {
 
-        AuthenticatedUserDTO user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+        hasPermission(user, "PUT");
 
-        if (!permitted) {
-            throw new ConflictException("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
-        }
-
-        Consumables consumableEdit = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Consumível não encontrado")
+        ConsumableRequest data = new ConsumableRequest(
+                request.name(),
+                request.description(),
+                request.costValue(),
+                request.quantity(),
+                request.placePurchase(),
+                request.purchaseLink(),
+                user.username()
         );
 
-        consumablesUpdateConverter.consumableUpdate(consumablesDTO, consumableEdit);
+        Consumables consumableEntity = consumablesRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Consumível não encontrado")
+        );
 
-        return consumablesConverter.consumablesDTO(consumablesRepository.save(consumableEdit));
+        Consumables consumableEdit = consumablesUpdateConverter.doUpdate(data, consumableEntity);
+
+
+        return consumablesConverter.toResponse(consumablesRepository.save(consumableEdit));
     }
 
-    public ConsumablesDTO editQuantityConsumable(String token, String id, ConsumablesQuantityDTO consumablesQuantityDTO) {
+    public ConsumableResponse editQuantityConsumable(String token, String id, ConsumableQuantityRequest request) {
 
-        AuthenticatedUserDTO user = userAuthenticated(token);
+        UserAuthenticatedResponse user = userAuthenticated(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+        hasPermission(user, "PATCH");
 
-        if (!permitted) {
-            throw new ConflictException("OPSS! Você não tem PERMISSÃO para editar consumíveis.");
-        }
-
-        Consumables consumableQuantity = consumablesRepository.findById(id).orElseThrow(
-                () -> new ConflictException("Consumível não encontrado")
+        Consumables consumable = consumablesRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Consumível não encontrado")
         );
 
-        if ("DECREASE".equalsIgnoreCase(consumablesQuantityDTO.getOperation())) {
+        if ("DECREASE".equalsIgnoreCase(request.operation())) {
 
-            if (consumableQuantity.getQuantity() < consumablesQuantityDTO.getQuantity()) {
+            if (consumable.getQuantity() < request.quantity()) {
                 throw new ConflictException("Estoque insuficiente para realizar a operação");
             }
 
-            consumableQuantity.setQuantity(consumableQuantity.getQuantity() - consumablesQuantityDTO.getQuantity());
+            consumable.setQuantity(consumable.getQuantity() - request.quantity());
         }
 
-        if ("INCREASE".equalsIgnoreCase(consumablesQuantityDTO.getOperation())) {
-            consumableQuantity.setQuantity(consumableQuantity.getQuantity() + consumablesQuantityDTO.getQuantity());
+        if ("INCREASE".equalsIgnoreCase(request.operation())) {
+            consumable.setQuantity(consumable.getQuantity() + request.quantity());
         }
 
-        return consumablesConverter.consumablesDTO(consumablesRepository.save(consumableQuantity));
+        return consumablesConverter.toResponse(consumablesRepository.save(consumable));
+    }
+
+    private void hasPermission(UserAuthenticatedResponse user, String method) {
+        boolean permitted = user.role() == UserRole.OWNER || user.role() == UserRole.ADMIN || user.role() == UserRole.EDITOR;
+
+        String methodType = "DELETE".equals(method) ? "excluir" : "editar";
+
+        if (!permitted) {
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para " + methodType + " consumíveis.");
+        }
     }
 }

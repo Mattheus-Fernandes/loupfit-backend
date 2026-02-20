@@ -1,12 +1,14 @@
 package com.loupfit.bffservice.infrastructure.exceptions;
 
+import com.loupfit.bffservice.business.record.error.ApiError;
+
 public class ConflictException extends RuntimeException {
 
-    public ConflictException(String message) {
-        super(message);
+    private final ApiError apiError;
+
+    public ConflictException(ApiError apiError) {
+        super(apiError.msg());
+        this.apiError = apiError;
     }
 
-    public ConflictException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
 }

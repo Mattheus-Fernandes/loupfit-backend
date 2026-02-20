@@ -1,9 +1,10 @@
 package com.loupfitproductservice.product_service.infrastructure.security;
 
 
-import com.loupfitproductservice.product_service.business.dto.UserDTO;
+import com.loupfitproductservice.product_service.business.record.user.out.UserResponse;
 import com.loupfitproductservice.product_service.infrastructure.client.UserClient;
 import com.loupfitproductservice.product_service.infrastructure.exceptions.ConflictExcpetion;
+import com.loupfitproductservice.product_service.infrastructure.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,13 +21,13 @@ public class UserDetailsServiceImpl {
         String bearerToken = "Bearer " + token;
 
         try {
-            UserDTO userDTO = userClient.getUserByUsername(bearerToken, username);
-            return User.withUsername(userDTO.getUsername())
+            UserResponse user = userClient.getUserByUsername(bearerToken, username);
+            return User.withUsername(user.username())
                     .password("N/A")
-                    .roles(userDTO.getRole().name())
+                    .roles(user.role().name())
                     .build();
         } catch (UsernameNotFoundException e) {
-            throw new ConflictExcpetion("Usuário não encontrado");
+            throw new ResourceNotFoundException("Usuário não encontrado");
         }
     }
 }

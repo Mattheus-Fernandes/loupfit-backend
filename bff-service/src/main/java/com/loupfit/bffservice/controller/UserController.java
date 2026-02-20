@@ -1,10 +1,10 @@
 package com.loupfit.bffservice.controller;
 
 import com.loupfit.bffservice.business.UserService;
-import com.loupfit.bffservice.business.dto.out.UserDTO;
-import com.loupfit.bffservice.business.dto.in.UserReqDTO;
-import com.loupfit.bffservice.business.dto.in.UserRoleDTO;
-import com.loupfit.bffservice.business.dto.in.UsernameReqDTO;
+import com.loupfit.bffservice.business.record.user.in.UserRequest;
+import com.loupfit.bffservice.business.record.user.in.UserRoleRequest;
+import com.loupfit.bffservice.business.record.user.in.UsernameRequest;
+import com.loupfit.bffservice.business.record.user.out.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @Tag(name = "User", description = "Registers and searches of users")
 public class UserController {
@@ -27,8 +27,8 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User saved success")
     @ApiResponse(responseCode = "409", description = "User already registered")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<UserDTO> saveUser(@RequestBody UserReqDTO newUser) {
-        return ResponseEntity.ok(userService.addUser(newUser));
+    public ResponseEntity<UserResponse> saveUser(@RequestBody UserRequest request) {
+        return ResponseEntity.ok(userService.addUser(request));
     }
 
     @GetMapping
@@ -36,7 +36,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "Users found")
     @ApiResponse(responseCode = "404", description = "Users not found")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<List<UserDTO>> findUser(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<UserResponse>> findUser(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(userService.filterAllUsers(token));
     }
 
@@ -45,7 +45,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User found")
     @ApiResponse(responseCode = "404", description = "User not found")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<UserDTO> findUserByUsername(
+    public ResponseEntity<UserResponse> findUserByUsername(
             @RequestHeader("Authorization") String token,
             @RequestParam("username") String username
     ) {
@@ -57,7 +57,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User removed successfully")
     @ApiResponse(responseCode = "404", description = "User already removed")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<UserDTO> deleteUser(
+    public ResponseEntity<UserResponse> deleteUser(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id
     ) {
@@ -69,13 +69,13 @@ public class UserController {
     @ApiResponse(responseCode = "201", description = "Edit updated successfully")
     @ApiResponse(responseCode = "409", description = "User already updated")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<UserDTO> updateUser(
+    public ResponseEntity<UserResponse> updateUser(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody UserReqDTO userEditDTO
+            @RequestBody UserRequest request
     ) {
 
-        return ResponseEntity.ok(userService.editUser(token, id, userEditDTO));
+        return ResponseEntity.ok(userService.editUser(token, id, request));
     }
 
     @PatchMapping("/{id}/role")
@@ -83,12 +83,12 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User updated successfully")
     @ApiResponse(responseCode = "409", description = "User already updated")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<UserDTO> updateRoleUser(
+    public ResponseEntity<UserResponse> updateRoleUser(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody UserRoleDTO dto
+            @RequestBody UserRoleRequest request
     ) {
-        return ResponseEntity.ok(userService.editRoleUser(token, id, dto));
+        return ResponseEntity.ok(userService.editRoleUser(token, id, request));
     }
 
     @PatchMapping("/{id}/username")
@@ -96,11 +96,11 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "Edit updated successfully")
     @ApiResponse(responseCode = "409", description = "User already updated")
     @ApiResponse(responseCode = "500", description = "Error server")
-    public ResponseEntity<UserDTO> updateUsernameUser(
+    public ResponseEntity<UserResponse> updateUsernameUser(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody UsernameReqDTO dto) {
-        return ResponseEntity.ok(userService.editUsername(token, id, dto));
+            @RequestBody UsernameRequest request) {
+        return ResponseEntity.ok(userService.editUsername(token, id, request));
     }
 
 

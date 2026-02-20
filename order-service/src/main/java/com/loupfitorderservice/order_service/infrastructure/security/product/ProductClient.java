@@ -1,7 +1,7 @@
 package com.loupfitorderservice.order_service.infrastructure.security.product;
 
-import com.loupfitorderservice.order_service.business.dto.product.ProductDTO;
-import com.loupfitorderservice.order_service.business.dto.product.ProductUpdateStockSalesDTO;
+import com.loupfitorderservice.order_service.business.record.product.in.ProductUpdateStockSalesRequest;
+import com.loupfitorderservice.order_service.business.record.product.out.ProductResponse;
 import com.loupfitorderservice.order_service.infrastructure.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.*;
 public interface ProductClient {
 
     @GetMapping("products/{id}")
-    ProductDTO getProductById(@RequestHeader("Authorization") String token, @PathVariable Long id);
+    ProductResponse getProductById(@RequestHeader("Authorization") String token, @PathVariable Long id);
 
     @PatchMapping("/products/{id}/inventory")
-    ProductDTO updateInventory(
+    ProductResponse updateInventory(
             @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @RequestBody ProductUpdateStockSalesDTO dto
+            @RequestBody ProductUpdateStockSalesRequest request
     );
 }

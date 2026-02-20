@@ -1,8 +1,9 @@
 package com.loupfit.bffservice.controller;
 
 import com.loupfit.bffservice.business.ConsumableService;
-import com.loupfit.bffservice.business.dto.in.ConsumablesQuantityDTO;
-import com.loupfit.bffservice.business.dto.out.ConsumablesDTO;
+import com.loupfit.bffservice.business.record.consumable.in.ConsumableQuantityRequest;
+import com.loupfit.bffservice.business.record.consumable.in.ConsumableRequest;
+import com.loupfit.bffservice.business.record.consumable.out.ConsumableResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,20 +18,20 @@ public class ConsumableController {
     private final ConsumableService consumableService;
 
     @PostMapping
-    public ResponseEntity<ConsumablesDTO> saveConsumables(
+    public ResponseEntity<ConsumableResponse> saveConsumables(
             @RequestHeader("Authorization") String token,
-            @RequestBody ConsumablesDTO consumablesDTO
+            @RequestBody ConsumableRequest request
     ) {
-        return ResponseEntity.ok(consumableService.addConsumable(token, consumablesDTO));
+        return ResponseEntity.ok(consumableService.addConsumable(token, request));
     }
 
     @GetMapping
-    public ResponseEntity<List<ConsumablesDTO>> findAllConsumables(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<ConsumableResponse>> findAllConsumables(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(consumableService.filterAllConsumables(token));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ConsumablesDTO> deleteConsumables(
+    public ResponseEntity<ConsumableResponse> deleteConsumables(
             @RequestHeader("Authorization") String token,
             @PathVariable String id
     ) {
@@ -38,20 +39,20 @@ public class ConsumableController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ConsumablesDTO> updateConsumables(
+    public ResponseEntity<ConsumableResponse> updateConsumables(
             @RequestHeader("Authorization") String token,
-            @RequestBody ConsumablesDTO consumablesDTO,
+            @RequestBody ConsumableRequest request,
             @PathVariable String id
     ) {
-        return ResponseEntity.ok(consumableService.editConsumable(token, id, consumablesDTO));
+        return ResponseEntity.ok(consumableService.editConsumable(token, id, request));
     }
 
     @PatchMapping("/{id}/quantity")
-    public ResponseEntity<ConsumablesDTO> updateConsumablesQuantity(
+    public ResponseEntity<ConsumableResponse> updateConsumablesQuantity(
             @RequestHeader("Authorization") String token,
-            @RequestBody ConsumablesQuantityDTO consumablesQuantityDTO,
+            @RequestBody ConsumableQuantityRequest request,
             @PathVariable String id
     ) {
-        return ResponseEntity.ok(consumableService.editQuantityConsumable(token, id, consumablesQuantityDTO));
+        return ResponseEntity.ok(consumableService.editQuantityConsumable(token, id, request));
     }
 }

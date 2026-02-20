@@ -1,28 +1,28 @@
 package com.loupfit.bffservice.infrastructure.client;
 
-import com.loupfit.bffservice.business.dto.out.CustomerDTO;
-import com.loupfit.bffservice.business.dto.in.CustomerReqDTO;
-import com.loupfit.bffservice.infrastructure.client.config.UserClientConfig;
+import com.loupfit.bffservice.business.record.customer.in.CustomerRequest;
+import com.loupfit.bffservice.business.record.customer.out.CustomerResponse;
+import com.loupfit.bffservice.infrastructure.client.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "user-service-two", url = "${user.url}", configuration = UserClientConfig.class)
+@FeignClient(name = "user-service-two", url = "${user.url}", configuration = FeignConfig.class)
 public interface CustomerClient {
 
-    @PostMapping("/customer")
-    CustomerDTO saveCustomer(@RequestBody CustomerReqDTO dto);
+    @PostMapping("/customers")
+    CustomerResponse saveCustomer(@RequestBody CustomerRequest request);
 
-    @GetMapping("/customer")
-    List<CustomerDTO> findAllCustomers(@RequestHeader("Authorization") String token);
+    @GetMapping("/customers")
+    List<CustomerResponse> findAllCustomers(@RequestHeader("Authorization") String token);
 
-    @GetMapping("/customer/current")
-    CustomerDTO findByCurrentUser(@RequestHeader("Authorization") String token);
+    @GetMapping("/customers/current")
+    CustomerResponse findByCurrentUser(@RequestHeader("Authorization") String token);
 
-    @PutMapping("/customer")
-    CustomerDTO updateCustomer(@RequestHeader("Authorization") String token, @RequestBody CustomerReqDTO dto);
+    @PutMapping("/customers")
+    CustomerResponse updateCustomer(@RequestHeader("Authorization") String token, @RequestBody CustomerRequest request);
 
-    @DeleteMapping("/customer/{id}")
-    CustomerDTO deleteCustomer(@RequestHeader("Authorization") String token, @PathVariable Long id);
+    @DeleteMapping("/customers/{id}")
+    CustomerResponse deleteCustomer(@RequestHeader("Authorization") String token, @PathVariable Long id);
 }

@@ -9,7 +9,12 @@ import org.springframework.context.annotation.Configuration;
 public class FeignConfig {
 
     @Bean
-    public Client feignClient() {
+    public FeignError feignClient() {
+        return new FeignError();
+    }
+
+    @Bean
+    public Client feignErrorDecoder() {
         return new ApacheHttpClient();
     }
 }

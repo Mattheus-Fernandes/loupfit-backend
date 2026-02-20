@@ -1,8 +1,9 @@
 package com.loupfit_supplier_service.controller;
 
 import com.loupfit_supplier_service.business.SupplierService;
-import com.loupfit_supplier_service.business.dto.SupplierActiveDTO;
-import com.loupfit_supplier_service.business.dto.SupplierDTO;
+import com.loupfit_supplier_service.business.record.supplier.in.SupplierActiveRequest;
+import com.loupfit_supplier_service.business.record.supplier.in.SupplierRequest;
+import com.loupfit_supplier_service.business.record.supplier.out.SupplierResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +18,12 @@ public class SupplierController {
     private final SupplierService supplierService;
 
     @PostMapping
-    public ResponseEntity<SupplierDTO> saveSupplier(@RequestBody SupplierDTO dto) {
-        return ResponseEntity.ok(supplierService.addSupplier(dto));
+    public ResponseEntity<SupplierResponse> saveSupplier(@RequestBody SupplierRequest request) {
+        return ResponseEntity.ok(supplierService.addSupplier(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<SupplierDTO>> findSupplier(
+    public ResponseEntity<List<SupplierResponse>> findSupplier(
             @RequestParam(required = false) String name
     ) {
 
@@ -35,7 +36,7 @@ public class SupplierController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<SupplierDTO> deleteSupplier(
+    public ResponseEntity<SupplierResponse> deleteSupplier(
             @RequestHeader("Authorization") String token,
             @PathVariable String id
     ) {
@@ -43,20 +44,20 @@ public class SupplierController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SupplierDTO> editSupplier(
+    public ResponseEntity<SupplierResponse> editSupplier(
             @RequestHeader("Authorization") String token,
             @PathVariable String id,
-            @RequestBody SupplierDTO dto
+            @RequestBody SupplierRequest request
     ) {
-        return ResponseEntity.ok(supplierService.updateSupplier(token, id, dto));
+        return ResponseEntity.ok(supplierService.updateSupplier(token, id, request));
     }
 
     @PatchMapping("/{id}/active")
-    public ResponseEntity<SupplierDTO> editActiveSupplier(
+    public ResponseEntity<SupplierResponse> editActiveSupplier(
             @RequestHeader("Authorization") String token,
             @PathVariable String id,
-            @RequestBody SupplierActiveDTO dto
+            @RequestBody SupplierActiveRequest request
     ) {
-        return ResponseEntity.ok(supplierService.updateActiveSupplier(token, id, dto));
+        return ResponseEntity.ok(supplierService.updateActiveSupplier(token, id, request));
     }
 }

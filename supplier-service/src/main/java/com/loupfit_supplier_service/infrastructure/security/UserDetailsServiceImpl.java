@@ -1,7 +1,7 @@
 package com.loupfit_supplier_service.infrastructure.security;
 
 
-import com.loupfit_supplier_service.business.dto.UserDTO;
+import com.loupfit_supplier_service.business.record.user.out.UserResponse;
 import com.loupfit_supplier_service.infrastructure.client.UserClient;
 import com.loupfit_supplier_service.infrastructure.exceptions.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +20,10 @@ public class UserDetailsServiceImpl {
         String bearerToken = "Bearer " + token;
 
         try {
-            UserDTO userDTO = userClient.getUserByUsername(bearerToken, username);
-            return User.withUsername(userDTO.getUsername())
+            UserResponse user = userClient.getUserByUsername(bearerToken, username);
+            return User.withUsername(user.username())
                     .password("N/A")
-                    .roles(userDTO.getRole().name())
+                    .roles(user.role().name())
                     .build();
         } catch (UsernameNotFoundException e) {
             throw new ConflictException("Usuário não encontrado");

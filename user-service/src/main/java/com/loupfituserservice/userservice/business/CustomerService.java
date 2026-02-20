@@ -28,7 +28,7 @@ public class CustomerService {
     public CustomerResponse addCustomer(CustomerRequest request) {
         validateCustomer(request);
 
-        String password = request.password() != null ? request.password() : null;
+        String password = request.password() != null ? passwordEncoder.encode(request.password()) : null;
 
         CustomerRequest req = new CustomerRequest(
                 request.name(),

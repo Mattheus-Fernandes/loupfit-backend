@@ -1,12 +1,13 @@
 package com.loupfitproductservice.product_service.business;
 
-import com.loupfitproductservice.product_service.business.converter.ProductConverter;
-import com.loupfitproductservice.product_service.business.converter.ProductUpdateConverter;
-import com.loupfitproductservice.product_service.business.dto.product.ProductDTO;
-import com.loupfitproductservice.product_service.business.dto.UserDTO;
-import com.loupfitproductservice.product_service.business.dto.product.ProductUpdateJsonDTO;
-import com.loupfitproductservice.product_service.business.dto.product.ProductUpdatePriceDTO;
-import com.loupfitproductservice.product_service.business.dto.product.ProductUpdateStockSalesDTO;
+import com.loupfitproductservice.product_service.business.mapper.ProductConverter;
+import com.loupfitproductservice.product_service.business.mapper.ProductUpdateConverter;
+import com.loupfitproductservice.product_service.business.record.product.in.ProductPriceUpdateRequest;
+import com.loupfitproductservice.product_service.business.record.product.in.ProductRequest;
+import com.loupfitproductservice.product_service.business.record.product.in.ProductUpdateRequest;
+import com.loupfitproductservice.product_service.business.record.product.in.ProductUpdateStockSalesRequest;
+import com.loupfitproductservice.product_service.business.record.product.out.ProductResponse;
+import com.loupfitproductservice.product_service.business.record.user.out.UserResponse;
 import com.loupfitproductservice.product_service.infrastructure.client.UserClient;
 import com.loupfitproductservice.product_service.infrastructure.entity.Product;
 import com.loupfitproductservice.product_service.infrastructure.enums.UserRole;
@@ -34,53 +35,51 @@ public class ProductService {
     private final MinioService minioService;
     private final UserClient userClient;
 
-    private UserDTO authenticatedUser(String token) {
+    private UserResponse authenticatedUser(String token) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         String username = auth.getName();
 
-        UserDTO userDTO = userClient.getUserByUsername(token, username);
+        UserResponse user = userClient.getUserByUsername(token, username);
 
-        if (userDTO != null && userDTO.getUsername() != null) {
-            return new UserDTO(userDTO.getUsername(), userDTO.getRole());
+        if (user != null && user.username() != null) {
+            return new UserResponse(user.username(), user.role());
         }
 
         throw new ResourceNotFoundException("Usuário(a) não encontrado(a) " + username);
     }
 
-    public ProductDTO addProduct(String token, ProductDTO dto, MultipartFile file) {
+    public ProductResponse addProduct(String token, ProductRequest request, MultipartFile file) {
 
-        existProduct(dto.getName());
-
-        UserDTO user = authenticatedUser(token);
-        dto.setCreatedBy(user.getUsername());
+        UserResponse user = authenticatedUser(token);
 
         String imageUrl = minioService.uploadFile(file);
-        dto.setImageUrl(imageUrl);
 
-        Product newProduct = productConverter.productEntity(dto);
+        ProductRequest data = new ProductRequest(
+                request.name(),
+                request.description(),
+                imageUrl,
+                request.price(),
+                request.costPrice(),
+                request.stock(),
+                request.category(),
+                request.subcategory(),
+                request.size(),
+                request.material(),
+                request.sales(),
+                user.username()
+        );
 
-        return productConverter.productDTO(productRepository.save(newProduct));
+        Product product = productConverter.toEntity(data);
+
+        return productConverter.toResponse(productRepository.save(product));
     }
 
-    public void existProduct(String name) {
-        try {
-            boolean exist = productRepository.existsByName(name);
 
-            if (exist) {
-                throw new ConflictExcpetion("Produto já cadastrado " + name);
-
-            }
-
-        } catch (ConflictExcpetion e) {
-            throw new ConflictExcpetion(e.getMessage());
-        }
-    }
-
-    public List<ProductDTO> filterAllProduct() {
+    public List<ProductResponse> filterAllProduct() {
         try {
 
-            return productConverter.productsDTOList(
+            return productConverter.toResponseList(
                     productRepository.findAll()
             );
         } catch (ResourceNotFoundException e) {
@@ -88,10 +87,10 @@ public class ProductService {
         }
     }
 
-    public ProductDTO filterProductById(Long id) {
+    public ProductResponse filterProductById(Long id) {
         try {
 
-            return productConverter.productDTO(
+            return productConverter.toResponse(
                     productRepository.findById(id).orElseThrow(
                             () -> new ResourceNotFoundException("Nenhum produto encontrado")
                     )
@@ -103,7 +102,7 @@ public class ProductService {
         }
     }
 
-    public List<ProductDTO> filterProduct(String name, String category, String size, String createdBy) {
+    public List<ProductResponse> filterProduct(String name, String category, String size, String createdBy) {
 
         try {
 
@@ -123,7 +122,7 @@ public class ProductService {
                 throw new ResourceNotFoundException("Nenhum produto encontrado");
             }
 
-            return productConverter.productsDTOList(products);
+            return productConverter.toResponseList(products);
 
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
@@ -131,7 +130,7 @@ public class ProductService {
         }
     }
 
-    public List<ProductDTO> filterProductLowStock() {
+    public List<ProductResponse> filterProductLowStock() {
 
         try {
             List<Product> products = productRepository.findByStockLessThan(4);
@@ -140,13 +139,13 @@ public class ProductService {
                 throw new ResourceNotFoundException("Nenhum produto com baixo estoque encontrado.");
             }
 
-            return productConverter.productsDTOList(products);
+            return productConverter.toResponseList(products);
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
-    public List<ProductDTO> filterProductBestSellers() {
+    public List<ProductResponse> filterProductBestSellers() {
 
         try {
             List<Product> products = productRepository.findBySalesGreaterThan(10);
@@ -155,65 +154,72 @@ public class ProductService {
                 throw new ResourceNotFoundException("Nenhum produto encontrado.");
             }
 
-            return productConverter.productsDTOList(products);
+            return productConverter.toResponseList(products);
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
     }
 
-    public ProductDTO updateProduct(String token, Long id, ProductUpdateJsonDTO dto) {
+    public ProductResponse updateProduct(String token, Long id, ProductUpdateRequest request) {
 
-        UserDTO user = authenticatedUser(token);
+        UserResponse user = authenticatedUser(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+        hasPermission(user, "PUT");
 
-        if (!permitted) {
-            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar produto.");
-        }
+        ProductUpdateRequest data = new ProductUpdateRequest(
+                request.id(),
+                request.name(),
+                request.description(),
+                request.price(),
+                request.costPrice(),
+                request.stock(),
+                request.category(),
+                request.subcategory(),
+                request.size(),
+                request.color(),
+                request.material(),
+                request.sales(),
+                user.username()
+        );
 
         Product entity = productRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Produto não encontrado")
         );
 
-        productUpdateConverter.productUpdateJson(dto, entity);
+        Product productEdit = productUpdateConverter.doUpdate(data, entity);
 
-        return productConverter.productDTO(productRepository.save(entity));
+        return productConverter.toResponse(productRepository.save(productEdit));
     }
 
-    public ProductDTO updateStockAndSalesProduct(String token, Long id, ProductUpdateStockSalesDTO dto) {
+    public ProductResponse updateStockAndSalesProduct(String token, Long id, ProductUpdateStockSalesRequest request) {
 
-        UserDTO user = authenticatedUser(token);
+        UserResponse user = authenticatedUser(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
-
-        if (!permitted) {
-            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar produto.");
-        }
+        hasPermission(user, "PATCH");
 
         Product entity = productRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Produto não encontrado")
         );
 
-        String operation = dto.getOperation().toUpperCase();
+        String operation = request.operation().toUpperCase();
 
-        if ("STOCK".equalsIgnoreCase(dto.getInventory())) {
+        if ("STOCK".equalsIgnoreCase(request.operation())) {
 
             switch (operation) {
 
                 case "DECREASE":
 
-                    if (entity.getStock() < dto.getQuantity()) {
+                    if (entity.getStock() < request.quantity()) {
                         throw new ConflictExcpetion("Estoque insuficiente para realizar a operação");
                     }
 
-
-                    entity.setStock(entity.getStock() - dto.getQuantity());
+                    entity.setStock(entity.getStock() - request.quantity());
 
                     break;
 
                 case "INCREASE":
 
-                    entity.setStock(entity.getStock() + dto.getQuantity());
+                    entity.setStock(entity.getStock() + request.quantity());
 
                     break;
 
@@ -222,23 +228,23 @@ public class ProductService {
             }
         }
 
-        if ("SALES".equalsIgnoreCase(dto.getInventory())) {
+        if ("SALES".equalsIgnoreCase(request.inventory())) {
 
             switch (operation) {
 
                 case "DECREASE":
 
-                    if (entity.getSales() < dto.getQuantity()) {
+                    if (entity.getSales() < request.quantity()) {
                         throw new ConflictExcpetion("Não é possível remover mais vendas do que registradas");
                     }
 
-                    entity.setSales(entity.getSales() - dto.getQuantity());
+                    entity.setSales(entity.getSales() - request.quantity());
 
                     break;
 
                 case "INCREASE":
 
-                    entity.setSales(entity.getSales() + dto.getQuantity());
+                    entity.setSales(entity.getSales() + request.quantity());
 
                     break;
 
@@ -247,38 +253,34 @@ public class ProductService {
             }
         }
 
-        return productConverter.productDTO(productRepository.save(entity));
+        return productConverter.toResponse(productRepository.save(entity));
     }
 
-    public ProductDTO updatePriceProduct(String token, Long id, ProductUpdatePriceDTO price) {
+    public ProductResponse updatePriceProduct(String token, Long id, ProductPriceUpdateRequest request) {
 
-        UserDTO user = authenticatedUser(token);
+        UserResponse user = authenticatedUser(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
+        hasPermission(user, "PATCH");
 
-        if (!permitted) {
-            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar produto.");
-        }
+        ProductPriceUpdateRequest data = new ProductPriceUpdateRequest(
+                request.price()
+        );
 
         Product entity = productRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Produto não encontrado")
         );
 
-        productUpdateConverter.productUpdatePrice(price, entity);
+        Product productEdit = productUpdateConverter.doUpdatePrice(data, entity);
 
-        return productConverter.productDTO(productRepository.save(entity));
+        return productConverter.toResponse(productRepository.save(productEdit));
 
     }
 
-    public ProductDTO updateImageProduct(String token, Long id, MultipartFile file) {
+    public ProductResponse updateImageProduct(String token, Long id, MultipartFile file) {
 
-        UserDTO user = authenticatedUser(token);
+        UserResponse user = authenticatedUser(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EDITOR;
-
-        if (!permitted) {
-            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para editar produto.");
-        }
+        hasPermission(user, "PATCH");
 
         Product entity = productRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Produto não encontrado")
@@ -294,7 +296,7 @@ public class ProductService {
         String newImage = minioService.uploadFile(file);
         entity.setImageUrl(newImage);
 
-        return productConverter.productDTO(productRepository.save(entity));
+        return productConverter.toResponse(productRepository.save(entity));
 
     }
 
@@ -302,14 +304,10 @@ public class ProductService {
         return imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
     }
 
-    public ProductDTO removeProduct(String token, Long id) {
-        UserDTO user = authenticatedUser(token);
+    public ProductResponse removeProduct(String token, Long id) {
+        UserResponse user = authenticatedUser(token);
 
-        boolean permitted = user.getRole() == UserRole.OWNER || user.getRole() == UserRole.ADMIN;
-
-        if (!permitted) {
-            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para excluir produto.");
-        }
+       hasPermission(user, "DELETE");
 
         Product entity = productRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Produto não encontrado")
@@ -324,6 +322,16 @@ public class ProductService {
         // Second remove from DB
         productRepository.deleteById(id);
 
-        return productConverter.productDTO(entity);
+        return productConverter.toResponse(entity);
+    }
+
+    private void hasPermission(UserResponse user, String method) {
+        boolean permitted = user.role() == UserRole.OWNER || user.role() == UserRole.ADMIN || user.role() == UserRole.EDITOR;
+
+        String methodType = "DELETE".equals(method) ? "excluir" : "editar";
+
+        if (!permitted) {
+            throw new ForbiddenException("OPSS! Você não tem PERMISSÃO para " + methodType + " consumíveis.");
+        }
     }
 }

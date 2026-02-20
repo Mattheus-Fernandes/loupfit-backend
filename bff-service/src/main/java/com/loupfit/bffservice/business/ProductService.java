@@ -1,10 +1,11 @@
 package com.loupfit.bffservice.business;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.loupfit.bffservice.business.dto.in.ProductUpdateJsonDTO;
-import com.loupfit.bffservice.business.dto.in.ProductUpdatePriceDTO;
-import com.loupfit.bffservice.business.dto.in.ProductUpdateStockSalesDTO;
-import com.loupfit.bffservice.business.dto.out.ProductDTO;
+import com.loupfit.bffservice.business.record.product.in.ProductRequest;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdatePriceRequest;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdateRequest;
+import com.loupfit.bffservice.business.record.product.in.ProductUpdateStockSalesRequest;
+import com.loupfit.bffservice.business.record.product.out.ProductResponse;
 import com.loupfit.bffservice.infrastructure.client.ProductClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,11 @@ public class ProductService {
     private final ProductClient productClient;
     private final ObjectMapper objectMapper;
 
-    public ProductDTO addProduct(String token, ProductDTO dto, MultipartFile file) {
+    public ProductResponse addProduct(String token, ProductRequest request, MultipartFile file) {
 
         try {
             // DTO to JSON
-            String productJson = objectMapper.writeValueAsString(dto);
+            String productJson = objectMapper.writeValueAsString(request);
 
             return productClient.saveProduct(token, productJson, file);
 
@@ -32,39 +33,39 @@ public class ProductService {
         }
     }
 
-    public ProductDTO filterProductById(String token, Long id) {
+    public ProductResponse filterProductById(String token, Long id) {
         return productClient.findProductById(token, id);
     }
 
-    public List<ProductDTO> filterProduct(String token, String name, String category, String size, String createdBy) {
+    public List<ProductResponse> filterProduct(String token, String name, String category, String size, String createdBy) {
         return productClient.findProducts(token, name, category, size, createdBy);
     }
 
-    public List<ProductDTO> filterProductLowStock(String token) {
+    public List<ProductResponse> filterProductLowStock(String token) {
         return productClient.findProductsLowStock(token);
     }
 
-    public List<ProductDTO> filterProductBestSellers(String token) {
+    public List<ProductResponse> filterProductBestSellers(String token) {
         return productClient.findProductsBestSellers(token);
     }
 
-    public ProductDTO updateProduct(String token, Long id, ProductUpdateJsonDTO dto) {
-        return productClient.editProduct(token, id, dto);
+    public ProductResponse updateProduct(String token, Long id, ProductUpdateRequest request) {
+        return productClient.editProduct(token, id, request);
     }
 
-    public ProductDTO updateStockAndSalesProduct(String token, Long id, ProductUpdateStockSalesDTO dto) {
-        return productClient.editProductStockSale(token, id, dto);
+    public ProductResponse updateStockAndSalesProduct(String token, Long id, ProductUpdateStockSalesRequest request) {
+        return productClient.editProductStockSale(token, id, request);
     }
 
-    public ProductDTO updatePriceProduct(String token, Long id, ProductUpdatePriceDTO price) {
-        return productClient.editProductPrice(token, id, price);
+    public ProductResponse updatePriceProduct(String token, Long id, ProductUpdatePriceRequest request) {
+        return productClient.editProductPrice(token, id, request);
     }
 
-    public ProductDTO updateImageProduct(String token, Long id, MultipartFile file) {
+    public ProductResponse updateImageProduct(String token, Long id, MultipartFile file) {
         return productClient.editProductImage(token, id, file);
     }
 
-    public ProductDTO removeProduct(String token, Long id) {
+    public ProductResponse removeProduct(String token, Long id) {
         return productClient.deleteProduct(token, id);
     }
 }

@@ -1,6 +1,7 @@
 package com.loupfit.bffservice.business;
 
-import com.loupfit.bffservice.business.dto.out.OrderDTO;
+import com.loupfit.bffservice.business.record.order.in.OrderRequest;
+import com.loupfit.bffservice.business.record.order.out.OrderResponse;
 import com.loupfit.bffservice.infrastructure.client.OrderClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,15 +13,15 @@ public class OrderService {
 
     private final OrderClient orderClient;
 
-    public OrderDTO processSale(String token, OrderDTO dto) {
-        return orderClient.saveOrder(token, dto);
+    public OrderResponse processSale(String token, OrderRequest request) {
+        return orderClient.saveOrder(token, request);
     }
 
-    public List<OrderDTO> filterAllSales(String token) {
+    public List<OrderResponse> filterAllSales(String token) {
         return orderClient.findAllSales(token);
     }
 
-    public OrderDTO removeSale(String token, String id) {
+    public OrderResponse removeSale(String token, String id) {
         return orderClient.deleteSale(token, id);
     }
 }
