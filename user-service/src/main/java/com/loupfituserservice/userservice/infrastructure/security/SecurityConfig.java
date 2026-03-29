@@ -38,16 +38,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login").permitAll()
-                        //User
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users").hasAnyRole("OWNER", "ADMIN", "VIEWER")
-                        .requestMatchers(HttpMethod.PUT, "/users/**").hasAnyRole("OWNER", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/users/**").hasAnyRole("OWNER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("OWNER")
-
-                        //Customer
                         .requestMatchers(HttpMethod.POST, "/customers").permitAll()
-                        .requestMatchers("/customers/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
