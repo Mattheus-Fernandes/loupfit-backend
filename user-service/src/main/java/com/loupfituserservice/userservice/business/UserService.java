@@ -5,10 +5,14 @@ import com.loupfituserservice.userservice.business.record.user.out.UserResponse;
 import com.loupfituserservice.userservice.business.mapper.UserConverter;
 import com.loupfituserservice.userservice.business.mapper.UserUpdateConverter;
 import com.loupfituserservice.userservice.infrastructure.entity.User;
+import com.loupfituserservice.userservice.infrastructure.enums.UserRole;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ConflictException;
+import com.loupfituserservice.userservice.infrastructure.exceptions.ForbiddenException;
 import com.loupfituserservice.userservice.infrastructure.exceptions.ResourceNotFoundException;
 import com.loupfituserservice.userservice.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,24 @@ public class UserService {
     private final UserConverter userConverter;
     private final UserUpdateConverter userUpdateConverter;
     private final PasswordEncoder passwordEncoder;
+
+    private User userLogged() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        String user = auth.getName();
+
+        return userRepository.findByUsername(user).orElseThrow(
+                () -> new ResourceNotFoundException("Usuário logado não encontrado")
+        );
+    }
+
+    private void userValidation(String action) {
+        User user = userLogged();
+
+        if (user.getRole().equals(UserRole.VIEWER)) {
+            throw new ForbiddenException("Você não tem permissão para " + action + " usuário");
+        }
+    }
 
     public UserResponse addUser(UserRequest request) {
         existUsername(request.username());
@@ -74,6 +96,8 @@ public class UserService {
 
     public UserResponse removeUser(Long id) {
 
+        userValidation("excluir");
+
         User userDelete = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Usuário não encontrado")
         );
@@ -84,6 +108,8 @@ public class UserService {
     }
 
     public UserResponse editUser(Long id, UserRequest request) {
+
+        userValidation("editar");
 
         String password = request.password() != null ? passwordEncoder.encode(request.password()) : null;
 
@@ -107,6 +133,8 @@ public class UserService {
 
     public UserResponse editRoleUser(Long id, UserRoleRequest request) {
 
+        userValidation("editar");
+
         User entity = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Usuário não encontrado")
         );
@@ -119,6 +147,8 @@ public class UserService {
     }
 
     public UserResponse editUsername(Long id, UsernameRequest request) {
+
+        userValidation("editar");
 
         User entity = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Usuário não encontrado")
